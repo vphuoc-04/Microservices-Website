@@ -1,42 +1,123 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.App {
+    background-color: rgba(222, 221, 221, 0.3);
+    width: 100vw;  
+    height: 100vh;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/*** LOGIN ***/
+.login {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.login .form-container {
+    display: flex;
+    gap: 10px;
 }
 
-.card {
-  padding: 2em;
+.login .form-container .slogan-login {
+    margin-top: 50px;
+    width: 500px;
 }
 
-.read-the-docs {
-  color: #888;
+.login .form-container .slogan-login h2 {
+    color: rgb(115, 115, 115);
+}
+
+.login .form-container .slogan-login p {
+    color: rgb(115, 115, 115);
+}
+
+.login .form-container form{
+    padding: 40px 20px;
+    height: 250px;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 1px 1px 5px rgb(0, 0, 0, 0.3);
+}
+
+.login .form-container form .input {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.login form input {
+    width: 350px;
+    height: 30px;
+    outline: none;
+    border: 1px solid rgb(0, 0, 0, 0.3);
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+
+.login form input:focus {
+    outline: none; 
+    border-color: rgb(67, 169, 162);
+    transition: all 0.3s;
+}
+
+.login form input:-webkit-autofill {
+    background-color: rgba(255, 255, 255) !important; 
+    color: rgb(0, 0, 0) !important; 
+    transition: background-color 5000s ease-in-out 0s; 
+}
+
+.login form .input span {
+    color: red;
+    font-size: 12px;
+    margin-top: 10px;
+    position: absolute;
+    left: 530px;
+    margin-top: 45px;
+}
+
+.login form .login-button button {
+    width: 100%;
+    background-color: rgb(67, 169, 162);
+    color: white;
+    margin-top: 30px;
+    transition: all 0.3s;
+}
+
+.login form .login-button button:hover {
+    border: 1px solid rgb(57, 141, 137);
+    background-color: rgb(57, 141, 137);
+}
+
+.login form .forgot-password {
+    color: rgb(0, 94, 255);
+    font-size: 12px;
+    margin-top: 10px;
+    transition: all 0.3s;
+}
+
+.login form .forgot-password:hover {
+    color: rgb(1, 46, 124);
+    font-size: 12px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+
+.login form span {
+    color: red;
+    font-size: 12px;
+    margin-top: 10px;
+    position: absolute;
+    left: 530px;
+    margin-top: 5px;
+}
+
+.login form p {
+    font-size: 12px;
 }
