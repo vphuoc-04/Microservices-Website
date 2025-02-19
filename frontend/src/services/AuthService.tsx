@@ -1,14 +1,12 @@
 import axiosInstance from "../configs/axios";
+import { handleAxiosError } from "../helpers/axiosHelper";
 
 type LoginPayload = {
     email: string, 
     password: string,
 }
 
-const login = async (
-    payload:LoginPayload, 
-    setError: React.Dispatch<React.SetStateAction<string | null>>
-): Promise<boolean> => {
+const login = async (payload:LoginPayload): Promise<boolean> => {
     try {
         const response = await axiosInstance.post('/auth/login', {
             email: payload.email,
@@ -23,10 +21,8 @@ const login = async (
 
         return true;
 
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            setError(error.message);
-        } 
+    } catch (error) {
+        handleAxiosError(error);
         return false;
     }
     

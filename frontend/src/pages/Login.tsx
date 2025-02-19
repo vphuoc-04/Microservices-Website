@@ -6,25 +6,29 @@ import { SubmitHandler, useForm } from "react-hook-form"
 // Services
 import { login } from "../services/AuthService";
 
+// Redux
+import { useDispatch } from "react-redux";
+import { setToast } from "../redux/slice/toastSlice";
+
 type Inptus = {
     email: string,
     password: string,
 }
 
 const Login = () => {
-    const { register, handleSubmit, setFocus,  formState: { errors } } = useForm<Inptus>({
-
-    });
     const navigate = useNavigate();
-    const [error, setError] = React.useState<string | null>(null);
+    const dispatch = useDispatch();
+
+    const { register, handleSubmit, setFocus, formState: { errors } } = useForm<Inptus>();
 
     const loginHandler: SubmitHandler<Inptus> = async (payload) => {
-        const logged = await login(payload, setError);
+        const logged = await login(payload);
         if (logged) {
-            navigate('/admin/dashboard')
+            dispatch(setToast({ message: 'Login successfully', type: 'success' }))
+            navigate('/admin/dashboard');
         }
-    }
-
+    };
+    
     React.useEffect(() => {
         setFocus("email")
         setFocus("password")
@@ -54,13 +58,12 @@ const Login = () => {
                             <input 
                                 id="password"
                                 type="text"
-                                placeholder="Passowrd"
+                                placeholder="Password"
                                 {...register("password", { required: true })}
                             />
                             {errors?.password && <span>*Password is required</span>}
                         </div>
                     </div>
-                    {error && <span>*Email or password incorrect</span>}
                     <div className="login-button">
                         <button type = "submit">
                             Login

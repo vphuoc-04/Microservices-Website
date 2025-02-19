@@ -66,3 +66,14 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Toast */
+.Toastify__toast--error  {
+  top: 10px !important;
+  left: 580px !important;
+}
+
+.Toastify__toast--success  {
+  top: 10px !important;
+  left: 580px !important;
+}
