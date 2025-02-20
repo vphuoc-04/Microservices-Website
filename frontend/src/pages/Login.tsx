@@ -20,12 +20,23 @@ const Login = () => {
     const dispatch = useDispatch();
 
     const { register, handleSubmit, setFocus, formState: { errors } } = useForm<Inptus>();
+    const [loading, setLoading] = React.useState<boolean>(false)
+    const [show, setShow] = React.useState<boolean>(false);
 
+    // Login
     const loginHandler: SubmitHandler<Inptus> = async (payload) => {
-        const logged = await login(payload);
-        if (logged) {
-            dispatch(setToast({ message: 'Login successfully', type: 'success' }))
-            navigate('/admin/dashboard');
+        setLoading(true);
+        try {
+            const logged = await login(payload);
+            if (logged) {
+                dispatch(setToast({ message: 'Login successfully', type: 'success' }))
+                navigate('/admin/dashboard');
+            }
+        } catch (error) {
+            setLoading(false);
+            console.log(error);
+        } finally {
+            setLoading(false);
         }
     };
     
@@ -57,16 +68,22 @@ const Login = () => {
                         <div className="password-input">
                             <input 
                                 id="password"
-                                type="text"
+                                type={show ? "text" : "password"}
                                 placeholder="Password"
                                 {...register("password", { required: true })}
                             />
                             {errors?.password && <span>*Password is required</span>}
+                            <div className = "show-or-hide">
+                                <i 
+                                    className = { show === true ? "fa-regular fa-eye" : "fa-regular fa-eye-slash" } 
+                                    onClick = {() => setShow(!show) }
+                                />
+                            </div>
                         </div>
                     </div>
                     <div className="login-button">
-                        <button type = "submit">
-                            Login
+                        <button type = "submit" disabled = {loading}>
+                            {loading ? <div className="spinner"></div> : "Login"}
                         </button>
                     </div>
                     <div className="forgot-password">

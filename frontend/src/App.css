@@ -60,6 +60,13 @@ html, body {
     padding: 5px 10px;
 }
 
+.login form .input .show-or-hide {
+    position: absolute;
+    top: 115px;
+    left: 95%;
+    cursor: pointer;
+}   
+
 .login form input:focus {
     outline: none; 
     border-color: rgb(67, 169, 162);
