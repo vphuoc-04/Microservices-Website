@@ -14,8 +14,6 @@ const Dashboard = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        console.log("🔥 Dashboard Mounted! Message:", message, "Type:", type);
-
         showToast(message, type)
         dispatch(clearToast())
     }, [message, type])

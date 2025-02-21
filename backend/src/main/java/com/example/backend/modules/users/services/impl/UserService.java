@@ -1,6 +1,7 @@
 package com.example.backend.modules.users.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +28,9 @@ public class UserService extends BaseService implements UserServiceInterface {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Value("${jwt.defaultExpiration}")
+    private Long defaultExpiration;
+
     @Override
     public Object authenticate(LoginRequest request) {
         try {
@@ -47,7 +51,7 @@ public class UserService extends BaseService implements UserServiceInterface {
                 .phone(user.getPhone())
                 .build();
 
-            String token = jwtService.generateToken(user.getId(), user.getEmail());
+            String token = jwtService.generateToken(user.getId(), user.getEmail(), defaultExpiration);
 
             return new LoginResource(token, userResource);
 
