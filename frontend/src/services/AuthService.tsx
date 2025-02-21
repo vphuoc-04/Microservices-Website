@@ -17,8 +17,9 @@ const login = async (payload:LoginPayload): Promise<boolean> => {
         })
 
         if (response?.data) {
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-            localStorage.setItem('token', response.data.token)
+            localStorage.setItem('user', JSON.stringify(response.data.data.user));
+            localStorage.setItem('token', response.data.data.token);
+            localStorage.setItem('refresh_token', response.data.data.refreshToken);
         }
 
         console.log(response);
@@ -29,7 +30,8 @@ const login = async (payload:LoginPayload): Promise<boolean> => {
         handleAxiosError(error);
         return false;
     }
-    
 }
+
+
 
 export { login }
