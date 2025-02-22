@@ -9,6 +9,9 @@ import { showToast } from "../helpers/myHelper";
 import { RootState } from "../redux/store";
 import { clearToast } from "../redux/slice/toastSlice";
 
+// components
+import { Aside } from "./aside";
+
 const Layout: React.FC = () => {
     const dispatch = useDispatch();
     const { message, type } = useSelector((state: RootState) => state.toast);
@@ -19,8 +22,8 @@ const Layout: React.FC = () => {
     }, [message, type, dispatch]);
 
     return (
-        <div>
-            <h1>Layout</h1>
+        <div className="page">
+            <Aside />
             <Outlet />
         </div>
     );

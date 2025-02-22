@@ -128,3 +128,52 @@ html, body {
 .login form p {
     font-size: 12px;
 }
+
+
+
+/*** LAYOUT ***/
+/** page **/
+.page {
+    display: flex;
+}
+
+/** ASIDE **/
+.aside {
+    width: 250px;
+    height: 100vh;
+    background-color: rgb(57, 141, 137);
+    color: white;
+    padding: 0px 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-logo {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.sidebar-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: rgb(180, 180, 180);
+}
+
+.sidebar-item {
+    list-style: none;
+}
+
+.sidebar-submenu {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.sidebar-submenu.open {
+    max-height: 500px;
+    opacity: 1;
+    transform: translateY(0);
+}

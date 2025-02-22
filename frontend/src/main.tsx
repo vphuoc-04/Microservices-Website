@@ -15,11 +15,12 @@ import NoAuthMiddleware from './middlewares/NoAuthMiddleware.tsx'
 import AuthMiddleware from './middlewares/AuthMiddleware.tsx'
 
 // Components
-import { Layout } from './components/Layout.tsx'
+import { Layout } from './components/layout.tsx'
 
 // Pages
 import { Login } from './pages/Login.tsx'
 import { Dashboard } from './pages/Dashboard.tsx'
+import { UserManagement } from './pages/User/UserManagement.tsx'
 
 const router = createBrowserRouter([
   {
@@ -38,10 +39,8 @@ const router = createBrowserRouter([
       </AuthMiddleware>
     ),
     children: [
-      {
-        path: 'dashboard',
-        element: <Dashboard />
-      }
+      { path: 'dashboard', element: <Dashboard /> },
+      { path: 'user-management', element: <UserManagement /> }
     ]
   }
 ]);
