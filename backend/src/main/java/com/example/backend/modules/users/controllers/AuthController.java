@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.configs.JwtConfig;
 import com.example.backend.modules.users.entities.RefreshToken;
 import com.example.backend.modules.users.repositories.RefreshTokenRepository;
 import com.example.backend.modules.users.requests.BlacklistedTokenRequest;
@@ -39,6 +40,9 @@ public class AuthController {
     private JwtService jwtService;
 
     @Autowired
+    private JwtConfig jwtConfig;
+
+    @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
     public AuthController(
@@ -56,7 +60,7 @@ public class AuthController {
                 .secure(true)
                 .sameSite("Strict")
                 .path("/")
-                .maxAge(Duration.ofMinutes(5)) 
+                .maxAge(Duration.ofMillis(jwtConfig.getExpirationTime())) 
                 .build();
 
             ApiResource<LoginResource> response = ApiResource.ok(loginResource, "SUCCESS");
@@ -100,9 +104,17 @@ public class AuthController {
             String newToken = jwtService.generateToken(userId, email, null);
             String newRefreshToken = jwtService.generateRefreshToken(userId, email);
 
+            ResponseCookie accessTokenCookie = ResponseCookie.from("cookies", newToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Duration.ofMillis(jwtConfig.getExpirationTime())) 
+                .build();
+
             ApiResource<RefreshTokenResource> response = ApiResource.ok(new RefreshTokenResource(newToken, newRefreshToken), "SUCCESS");
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok().header("Set-Cookie", accessTokenCookie.toString()).body(response);
         }
         return ResponseEntity.internalServerError().body(ApiResource.message("NETWORK_ERROR", HttpStatus.INTERNAL_SERVER_ERROR));
     }
