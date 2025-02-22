@@ -5,7 +5,6 @@ import './App.css'
 import { store } from './redux/store'
 import { Provider } from 'react-redux'
 
-import { ToastProvider } from './contexts/ToastContext.tsx'
 import { ToastContainer } from 'react-toastify'
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
@@ -47,9 +46,7 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
-      <ToastProvider>
-        <RouterProvider router={router} />
-        <ToastContainer position='top-center' />
-    </ToastProvider>
+      <RouterProvider router={router} />
+      <ToastContainer position='top-center' />
   </Provider>
 )

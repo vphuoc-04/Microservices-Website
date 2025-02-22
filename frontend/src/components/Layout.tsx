@@ -11,6 +11,7 @@ import { clearToast } from "../redux/slice/toastSlice";
 
 // components
 import { Aside } from "./aside";
+import { Header } from "./header";
 
 const Layout: React.FC = () => {
     const dispatch = useDispatch();
@@ -24,7 +25,10 @@ const Layout: React.FC = () => {
     return (
         <div className="page">
             <Aside />
-            <Outlet />
+            <div className="main-content">
+                <Header />
+                <Outlet />
+            </div>
         </div>
     );
 };

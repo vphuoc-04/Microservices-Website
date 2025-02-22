@@ -8,8 +8,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -83,6 +85,31 @@ public class AuthController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(ApiResource.message("NETWORK_ERROR", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
+    @GetMapping("logout") 
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String bearerToken) {
+        try {
+            String token = bearerToken.substring(7);
+
+            BlacklistedTokenRequest request = new BlacklistedTokenRequest();
+            request.setToken(token);
+    
+            Object message = blacklistedTokenService.create(request);
+
+            ResponseCookie clearCookie = ResponseCookie.from("cookies", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+
+            return ResponseEntity.ok().header("Set-Cookie", clearCookie.toString()).body(message);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(ApiResource.message("NETWORK_ERROR", HttpStatus.UNAUTHORIZED));
         }
     }
 

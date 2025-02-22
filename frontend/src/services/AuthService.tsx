@@ -32,6 +32,29 @@ const login = async (payload:LoginPayload): Promise<boolean> => {
     }
 }
 
+const logout = async (): Promise<boolean> => {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("Token not found");
+        }
 
+        await axiosInstance.get("/auth/logout", {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
 
-export { login }
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        localStorage.removeItem("refresh_token");
+
+        return true;
+
+    } catch (error) {
+        handleAxiosError(error);
+        return false;
+    }
+}
+
+export { login, logout }

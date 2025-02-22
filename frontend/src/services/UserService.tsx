@@ -21,9 +21,9 @@ const fetchUser = async(): Promise<User | null> => {
             },
         });
 
-        console.log("User data: ", response.data)
+        console.log("User data: ", response.data.data)
 
-        return response.data
+        return response.data.data
 
 
     } catch (error) {
