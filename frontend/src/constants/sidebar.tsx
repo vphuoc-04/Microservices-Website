@@ -7,6 +7,7 @@ export const sidebarItem = [
             {
                 icons: <FaChartPie />,
                 label: 'Dashboard',
+                active: ['dashboard'],
                 links: [
                     { title: 'Overview', to: '/admin/dashboard' },
                     { title: 'Details', to: '/admin/dashboard/details' }
@@ -20,9 +21,10 @@ export const sidebarItem = [
             {
                 icons: <FaUser />,
                 label: 'User',
+                active: ['user'],
                 links: [
-                    { title: 'User management', to: '/admin/user-management' },
-                    { title: 'User cataloge management', to: 'admin/user-catalogue-management' }
+                    { title: 'User management', to: '/admin/user/index' },
+                    { title: 'User cataloge management', to: '/admin/user/catalogue' }
                 ]
             }
         ]
