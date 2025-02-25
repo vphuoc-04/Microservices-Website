@@ -1,34 +1,45 @@
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react";
 
 import {
-    Card,
-    CardContent,
-    CardDescription,
+    Card, 
+    CardContent, 
+    CardHeader, 
+    CardTitle, 
+    CardDescription, 
     CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
+    Table, 
+    TableBody, 
+    TableCell, 
+    TableHead, 
+    TableHeader, 
     TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
-import { Checkbox } from "@/components/ui/checkbox"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 // Types
-import { UserCatalogue } from "@/types/UserCatalogue"
+import { UserCatalogue } from "@/types/UserCatalogue";
 
 // Services
-import { fetchUserCatalogue } from "@/services/UserCatalogueService"
+import { fetchUserCatalogue, createUserCatalogue } from "@/services/UserCatalogueService";
 
 const Catalogue = () => {
-    const [userCatalogue, setUserCatalogue] = useState<UserCatalogue[]>([])
+    const [userCatalogue, setUserCatalogue] = useState<UserCatalogue[]>([]);
+    const [name, setName] = useState("");
+    const [publish, setPublish] = useState("1"); 
 
     useEffect(() => {
         const fetchUserCatalogueData = async () => {
@@ -38,46 +49,77 @@ const Catalogue = () => {
         fetchUserCatalogueData();
     }, []);
 
+    const createUserCatalogueHanler = async () => {
+        if (!name.trim()) {
+            return;
+        }
+
+        const result = await createUserCatalogue(name, publish);
+        if (result) {
+            setName(""); 
+            const updatedCatalogue = await fetchUserCatalogue(); 
+            setUserCatalogue(updatedCatalogue);
+        }
+    };
+
     return (
         <div className="container">
             <Card>
                 <CardHeader>
-                    <CardTitle>Card Title</CardTitle>
-                    <CardDescription>Card Description</CardDescription>
+                    <CardTitle></CardTitle>
+                    <CardDescription></CardDescription>
                 </CardHeader>
                 <CardContent>
+                    <div className="flex gap-2 mb-4">
+                        <Input
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="User catalogue name..."
+                        />
+                        <Select value={publish} onValueChange={setPublish}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="0">Inactive</SelectItem>
+                                <SelectItem value="1">Active</SelectItem>
+                                <SelectItem value="2">Archived</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Button className="text-black" onClick={createUserCatalogueHanler}>Create</Button>
+                    </div>
+
                     <Table>
-                        <TableCaption>A list of your recent invoices.</TableCaption>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>
-                                    <Checkbox disabled/>
+                                    <Checkbox disabled />
                                 </TableHead>
-                                <TableHead className="w-[100px]">Id</TableHead>
-                                <TableHead>name</TableHead>
-                                <TableHead>publish</TableHead>
+                                <TableHead>ID</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Status</TableHead>
                                 <TableHead>Created by</TableHead>
                                 <TableHead>Updated by</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {userCatalogue.length > 0 ? (
-                                userCatalogue.map((catalogue, catalogueIndex) => (
-                                    <TableRow key={catalogueIndex}>
-                                        <TableCell>
-                                            <Checkbox />
-                                        </TableCell>
+                                userCatalogue.map((catalogue) => (
+                                    <TableRow key={catalogue.id}>
+                                        <TableCell><Checkbox /></TableCell>
                                         <TableCell>{catalogue.id}</TableCell>
                                         <TableCell>{catalogue.name}</TableCell>
-                                        <TableCell>{catalogue.publish}</TableCell>
+                                        <TableCell>
+                                            {catalogue.publish === 0 ? "Inactive" : catalogue.publish === 1 ? "Active" : "Archived"}
+                                        </TableCell>
                                         <TableCell>{catalogue.createdBy}</TableCell>
                                         <TableCell>{catalogue.updatedBy}</TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell className="text-center">
-                                        No data available
+                                    <TableCell colSpan={6} className="text-center">
+                                        No data
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -85,7 +127,7 @@ const Catalogue = () => {
                     </Table>
                 </CardContent>
                 <CardFooter>
-                    <p>Card Footer</p>
+                    <p>User catalogue management</p>
                 </CardFooter>
             </Card>
         </div>

@@ -32,4 +32,34 @@ const fetchUserCatalogue = async(): Promise<UserCatalogue[]> => {
     }
 }
 
-export { fetchUserCatalogue }
+const createUserCatalogue = async(name: string, publish: string): Promise<boolean> => {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("Token not found");
+            return false;
+        }
+
+        const response = await axiosInstance.post(
+            "/user_catalogue",
+            { name, publish },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        console.log("New User Catalogue Created: ", response.data);
+        return true;
+
+    } catch (error) {
+        handleAxiosError(error);
+        return false;
+    }
+}
+
+export { 
+    fetchUserCatalogue,
+    createUserCatalogue
+}

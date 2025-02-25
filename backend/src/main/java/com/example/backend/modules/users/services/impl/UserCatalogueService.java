@@ -8,9 +8,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.modules.users.entities.UserCatalogue;
 import com.example.backend.modules.users.repositories.UserCatalogueRepository;
+import com.example.backend.modules.users.requests.UserCatalogue.StoreRequest;
 import com.example.backend.modules.users.services.interfaces.UserCatalogueServiceInterface;
 import com.example.backend.services.BaseService;
 
@@ -30,4 +32,20 @@ public class UserCatalogueService extends BaseService implements UserCatalogueSe
 
         return userCatalogueRepository.findAll(pageable);
     }
+
+    @Override
+    @Transactional
+    public UserCatalogue create(StoreRequest request, Long createdBy) {
+        try {
+            UserCatalogue payload = UserCatalogue.builder()
+                .name(request.getName())
+                .publish(request.getPublish())
+                .createdBy(createdBy)
+                .build();
+
+            return userCatalogueRepository.save(payload);
+        } catch (Exception e) {
+            throw new RuntimeException("Transaction failed: " + e.getMessage());
+        }
+    }  
 }
