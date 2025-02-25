@@ -59,7 +59,35 @@ const createUserCatalogue = async(name: string, publish: string): Promise<boolea
     }
 }
 
+const updateUserCatalogue = async(id: number, name: string, publish: string): Promise<boolean> => {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("Token not found");
+            return false;
+        }
+
+        const response = await axiosInstance.put(
+            `/user_catalogue/${id}`,
+            { name, publish },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        console.log("User Catalogue Updated: ", response.data);
+        return true;
+
+    } catch (error) {
+        handleAxiosError(error);
+        return false;
+    }
+}
+
 export { 
     fetchUserCatalogue,
-    createUserCatalogue
+    createUserCatalogue,
+    updateUserCatalogue
 }

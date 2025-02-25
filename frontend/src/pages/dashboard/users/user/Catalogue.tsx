@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-
 import {
     Card, 
     CardContent, 
@@ -8,7 +7,6 @@ import {
     CardDescription, 
     CardFooter,
 } from "@/components/ui/card";
-
 import {
     Table, 
     TableBody, 
@@ -17,57 +15,59 @@ import {
     TableHeader, 
     TableRow,
 } from "@/components/ui/table";
-
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
-
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-// Types
 import { UserCatalogue } from "@/types/UserCatalogue";
-
-// Services
-import { fetchUserCatalogue, createUserCatalogue } from "@/services/UserCatalogueService";
+import { fetchUserCatalogue, createUserCatalogue, updateUserCatalogue } from "@/services/UserCatalogueService";
 
 const Catalogue = () => {
     const [userCatalogue, setUserCatalogue] = useState<UserCatalogue[]>([]);
     const [name, setName] = useState("");
-    const [publish, setPublish] = useState("1"); 
+    const [publish, setPublish] = useState("1");
+    const [editingId, setEditingId] = useState<number | null>(null);
 
     useEffect(() => {
-        const fetchUserCatalogueData = async () => {
-            const userCatalogueData = await fetchUserCatalogue();
-            setUserCatalogue(userCatalogueData);
+        const fetchData = async () => {
+            const data = await fetchUserCatalogue();
+            setUserCatalogue(data);
         };
-        fetchUserCatalogueData();
+        fetchData();
     }, []);
 
-    const createUserCatalogueHanler = async () => {
-        if (!name.trim()) {
-            return;
-        }
+    const handleCreateOrUpdate = async () => {
+        if (!name.trim()) return;
 
-        const result = await createUserCatalogue(name, publish);
-        if (result) {
-            setName(""); 
-            const updatedCatalogue = await fetchUserCatalogue(); 
-            setUserCatalogue(updatedCatalogue);
+        if (editingId !== null) {
+            await updateUserCatalogue(editingId, name, publish);
+            setEditingId(null);
+        } else {
+            await createUserCatalogue(name, publish);
         }
+        setName("");
+        const updatedData = await fetchUserCatalogue();
+        setUserCatalogue(updatedData);
+    };
+
+    const handleEdit = (catalogue: UserCatalogue) => {
+        setEditingId(catalogue.id);
+        setName(catalogue.name);
+        setPublish(String(catalogue.publish));
     };
 
     return (
         <div className="container">
             <Card>
                 <CardHeader>
-                    <CardTitle></CardTitle>
-                    <CardDescription></CardDescription>
+                    <CardTitle>User Catalogue</CardTitle>
+                    <CardDescription>Manage user catalogues</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="flex gap-2 mb-4">
@@ -86,20 +86,21 @@ const Catalogue = () => {
                                 <SelectItem value="2">Archived</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Button className="text-black" onClick={createUserCatalogueHanler}>Create</Button>
+                        <Button className="text-black" onClick={handleCreateOrUpdate}>
+                            {editingId !== null ? "Update" : "Create"}
+                        </Button>
                     </div>
 
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>
-                                    <Checkbox disabled />
-                                </TableHead>
+                                <TableHead><Checkbox disabled /></TableHead>
                                 <TableHead>ID</TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Created by</TableHead>
                                 <TableHead>Updated by</TableHead>
+                                <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -114,11 +115,14 @@ const Catalogue = () => {
                                         </TableCell>
                                         <TableCell>{catalogue.createdBy}</TableCell>
                                         <TableCell>{catalogue.updatedBy}</TableCell>
+                                        <TableCell>
+                                            <Button variant="outline" size="sm" onClick={() => handleEdit(catalogue)}>Edit</Button>
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center">
+                                    <TableCell colSpan={7} className="text-center">
                                         No data
                                     </TableCell>
                                 </TableRow>
