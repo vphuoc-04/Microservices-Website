@@ -7,6 +7,7 @@ import {
     CardDescription, 
     CardFooter,
 } from "@/components/ui/card";
+
 import {
     Table, 
     TableBody, 
@@ -15,6 +16,7 @@ import {
     TableHeader, 
     TableRow,
 } from "@/components/ui/table";
+
 import {
     Select,
     SelectContent,
@@ -22,11 +24,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UserCatalogue } from "@/types/UserCatalogue";
-import { fetchUserCatalogue, createUserCatalogue, updateUserCatalogue } from "@/services/UserCatalogueService";
+
+import { 
+    fetchUserCatalogue, 
+    createUserCatalogue, 
+    updateUserCatalogue, 
+    deleteUserCatalogue 
+} from "@/services/UserCatalogueService";
 
 const Catalogue = () => {
     const [userCatalogue, setUserCatalogue] = useState<UserCatalogue[]>([]);
@@ -60,6 +69,13 @@ const Catalogue = () => {
         setEditingId(catalogue.id);
         setName(catalogue.name);
         setPublish(String(catalogue.publish));
+    };
+
+    const handleDelete = async (id: number) => {
+        const success = await deleteUserCatalogue(id);
+        if (success) {
+            setUserCatalogue(userCatalogue.filter(item => item.id !== id));
+        }
     };
 
     return (
@@ -117,6 +133,14 @@ const Catalogue = () => {
                                         <TableCell>{catalogue.updatedBy}</TableCell>
                                         <TableCell>
                                             <Button variant="outline" size="sm" onClick={() => handleEdit(catalogue)}>Edit</Button>
+                                            <Button 
+                                                variant="outline" 
+                                                size="sm" 
+                                                className="text-red-500 border-red-500 ml-2"
+                                                onClick={() => handleDelete(catalogue.id)}
+                                            >
+                                                Delete
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))

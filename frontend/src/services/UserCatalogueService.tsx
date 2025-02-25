@@ -86,8 +86,32 @@ const updateUserCatalogue = async(id: number, name: string, publish: string): Pr
     }
 }
 
+const deleteUserCatalogue = async (id: number): Promise<boolean> => {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("Token not found");
+            return false;
+        }
+
+        const response = await axiosInstance.delete(`/user_catalogue/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        console.log("User Catalogue Deleted: ", response.data);
+        return true;
+    } catch (error) {
+        handleAxiosError(error);
+        return false;
+    }
+};
+
+
 export { 
     fetchUserCatalogue,
     createUserCatalogue,
-    updateUserCatalogue
+    updateUserCatalogue,
+    deleteUserCatalogue
 }
