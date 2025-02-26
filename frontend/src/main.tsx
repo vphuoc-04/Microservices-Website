@@ -14,20 +14,25 @@ import NoAuthMiddleware from './middlewares/NoAuthMiddleware.tsx'
 import AuthMiddleware from './middlewares/AuthMiddleware.tsx'
 
 // Components
-import { Layout } from './components/dashboard/layout.tsx'
+import LayoutDashboard from './components/dashboard/layout.tsx'
+import LayoutCustomer from './components/customer/layout.tsx'
 
-// Pages
-import { Login } from './pages/dashboard/Login.tsx'
-import { Dashboard } from './pages/dashboard/Dashboard.tsx'
+// Admin pages
+import LoginDashboard from './pages/dashboard/Login.tsx'
+import DashboardPanel from './pages/dashboard/Dashboard.tsx'
 import { View } from './pages//dashboard/users/user/View.tsx'
-import { Catalogue } from './pages/dashboard/users/user/Catalogue.tsx'
+import { Catalogue } from './pages/dashboard/users/catalogue/Catalogue.tsx'
+
+// Customer pages
+import LoginCustomer from './pages/customer/Login.tsx'
+import RegisterCustomer from './pages/customer/Register.tsx'
 
 const router = createBrowserRouter([
   {
     path: '/admin/login',
     element: (
       <NoAuthMiddleware>
-        <Login />
+        <LoginDashboard />
       </NoAuthMiddleware>
     )
   },
@@ -35,15 +40,43 @@ const router = createBrowserRouter([
     path: '/admin',
     element: (
       <AuthMiddleware>
-        <Layout />
+        <LayoutDashboard />
       </AuthMiddleware>
     ),
     children: [
-      { path: 'dashboard', element: <Dashboard /> },
+      { path: 'dashboard', element: <DashboardPanel /> },
 
       // User
       { path: 'user/index', element: <View /> },
       { path: 'user/catalogue', element: <Catalogue /> }
+    ]
+  },
+
+  {
+    path: '/login', 
+    element: (
+      <NoAuthMiddleware>
+        <LoginCustomer />
+      </NoAuthMiddleware>
+    )
+  },
+  {
+    path: '/register',
+    element: (
+      <NoAuthMiddleware>
+        <RegisterCustomer />
+      </NoAuthMiddleware>
+    )
+  },
+  {
+    path: '/',
+    element: (
+      <AuthMiddleware>
+        <LayoutCustomer />
+      </AuthMiddleware>
+    ),
+    children: [
+      
     ]
   }
 ]);

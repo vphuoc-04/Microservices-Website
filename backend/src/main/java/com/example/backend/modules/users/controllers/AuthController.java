@@ -21,6 +21,7 @@ import com.example.backend.modules.users.repositories.RefreshTokenRepository;
 import com.example.backend.modules.users.requests.BlacklistedTokenRequest;
 import com.example.backend.modules.users.requests.LoginRequest;
 import com.example.backend.modules.users.requests.RefreshTokenRequest;
+import com.example.backend.modules.users.requests.RegisterRequest;
 import com.example.backend.modules.users.resources.LoginResource;
 import com.example.backend.modules.users.resources.RefreshTokenResource;
 import com.example.backend.modules.users.services.impl.BlacklistedTokenService;
@@ -51,6 +52,24 @@ public class AuthController {
         UserServiceInterface userService
     ){
         this.userService = userService;
+    }
+
+    @PostMapping("register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        Object result = userService.validateRegistration(registerRequest);
+
+        if (result instanceof ApiResource<?> apiResource) {
+            if (apiResource.getError() != null) {
+                String errorCode = apiResource.getError().getCode();
+                
+                if ("EMAIL_EXISTS".equals(errorCode) || "PHONE_EXISTS".equals(errorCode)) {
+                    return ResponseEntity.unprocessableEntity().body(apiResource);
+                }
+            }
+            return ResponseEntity.ok(apiResource);
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error");
     }
 
     @PostMapping("login")

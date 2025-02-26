@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import { setToast } from "../../redux/slice/toastSlice";
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input";
 
 type Inptus = {
     email: string,
@@ -57,10 +58,10 @@ const Login = () => {
                             We wish you a good day.
                         </p>
                     </div>
-                    <form onSubmit={handleSubmit(loginHandler)} className="p-10 h-[300px] rounded-lg bg-white shadow-md">
+                    <form onSubmit={handleSubmit(loginHandler)} className="py-10 px-5 h-[300px] rounded-lg bg-white border-2">
                         <div className="flex flex-col gap-6">
                             <div className="relative">
-                                <input className="w-[350px] h-9 border border-gray-300 rounded py-5 px-3 focus:border-teal-500 transition"
+                                <Input className="w-[350px] h-9 border border-gray-300 rounded py-5 px-3 focus:border-teal-500 transition"
                                     id="email"
                                     type="text"
                                     placeholder="Email"
@@ -71,7 +72,7 @@ const Login = () => {
                                 )}
                             </div>
                             <div className="relative">
-                                <input className="w-[350px] h-9 border border-gray-300 rounded py-5 px-3 focus:border-teal-500 transition"
+                                <Input className="w-[350px] h-9 border border-gray-300 rounded py-5 px-3 focus:border-teal-500 transition"
                                     id="password"
                                     type={show ? "text" : "password"}
                                     placeholder="Password"
@@ -108,4 +109,4 @@ const Login = () => {
 
 };
 
-export { Login };
+export default Login;

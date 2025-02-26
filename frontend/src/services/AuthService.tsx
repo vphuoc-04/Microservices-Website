@@ -4,9 +4,39 @@ import axiosInstance from "../configs/axios";
 // Helpers
 import { handleAxiosError } from "../helpers/axiosHelper";
 
+type RegisterPayload = {
+    firstName: string,
+    middleName: string | null,
+    lastName: string,
+    email: string,
+    phone: string,
+    password: string,
+}
+
 type LoginPayload = {
     email: string, 
     password: string,
+}
+
+const customerRegister = async (payload: RegisterPayload): Promise<boolean> => {
+    try {
+        const response = await axiosInstance.post('/auth/register', {
+            firstName: payload.firstName,
+            middleName: payload.middleName,
+            lastName: payload.lastName,
+            email: payload.email,
+            phone: payload.phone,
+            password: payload.password
+        })
+
+        console.log(response.data)
+
+        return response.data;
+
+    } catch (error) {
+        handleAxiosError(error);
+        return false;
+    }
 }
 
 const login = async (payload:LoginPayload): Promise<boolean> => {
@@ -57,4 +87,4 @@ const logout = async (): Promise<boolean> => {
     }
 }
 
-export { login, logout }
+export { login, logout, customerRegister }
