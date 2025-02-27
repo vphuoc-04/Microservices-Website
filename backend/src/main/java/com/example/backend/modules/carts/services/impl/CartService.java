@@ -48,4 +48,8 @@ public class CartService extends BaseService implements CartServiceInterface {
         cartRepository.delete(cart);
         return true;
     }
+
+    public void clearCartByUser(Long userId) {
+        cartRepository.deleteByUserId(userId);
+    }
 }
