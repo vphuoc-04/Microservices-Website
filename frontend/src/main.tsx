@@ -26,6 +26,7 @@ import { Catalogue } from './pages/dashboard/users/catalogue/Catalogue.tsx'
 // Customer pages
 import LoginCustomer from './pages/customer/Login.tsx'
 import RegisterCustomer from './pages/customer/Register.tsx'
+import Home from './pages/customer/Home.tsx'
 
 const router = createBrowserRouter([
   {
@@ -76,7 +77,7 @@ const router = createBrowserRouter([
       </AuthMiddleware>
     ),
     children: [
-      
+      { path: '/', element: <Home /> }
     ]
   }
 ]);
