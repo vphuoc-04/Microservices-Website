@@ -49,6 +49,15 @@ public class SecurityConfig {
                 ).
                 
                 permitAll()
+
+                .requestMatchers(
+                    "/api/v1/add_to_cart",
+                    "/api/v1/get_cart_data/{userId}",
+                    "/api/v1/remove_from_cart/{id}"
+                ).
+                
+                permitAll()
+
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
