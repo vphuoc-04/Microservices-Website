@@ -23,7 +23,7 @@ const Layout: React.FC = () => {
     }, [message, type, dispatch]);
 
     return (
-        <div className="flex flex-col min-h-screen w-screen">
+        <div className="flex flex-col min-h-screen">
             <Header />
                 <main className="flex-grow p-3">
                     <Outlet />

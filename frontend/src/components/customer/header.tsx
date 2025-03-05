@@ -46,8 +46,11 @@ const Header = () => {
     }
 
     return (
-        <div className="bg-white h-15 flex justify-end pr-5 relative border-b-4 relative w-screen">
-            <div className="relative mr-10 cursor-pointer p-2">
+        <div className="bg-white h-15 flex justify-between relative border-b-4 relative w-full">
+            <a className="w-12 mt-2 ml-15" href="/">
+                <img src="https://imgur.com/M7Hsxrq.png" alt="" />
+            </a>
+            <div className="relative mr-15 cursor-pointer p-2">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <img

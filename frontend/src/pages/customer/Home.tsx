@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface Product {
-  id: number;
-  productName: string;
-  productPrice: number;
-  productImage: string;
+    id: number;
+    productName: string;
+    productPrice: number;
+    productImage: string;
 }
 
 interface Payment {
@@ -195,7 +195,7 @@ const Home: React.FC = () => {
                 setPaymentHistory(data.data.map((payment: { id: number; totalAmount: number; paymentDate: string }) => ({
                     id: payment.id,
                     totalAmount: payment.totalAmount,
-                    paymentDate: new Date(payment.paymentDate) // Chuyển đổi nếu cần
+                    paymentDate: new Date(payment.paymentDate) 
                 })));
             } else {
                 console.error("Error:", data.message);
@@ -212,7 +212,7 @@ const Home: React.FC = () => {
     );
     
     return (
-        <div className="p-4">
+        <div className="p-5">
             <h1 className="text-2xl font-bold mb-4">Sản phẩm nổi bật</h1>
 
             <Input 
@@ -223,26 +223,31 @@ const Home: React.FC = () => {
                 className="w-full p-2 mb-4 border border-gray-300 rounded-lg"
             />
 
-            <div className="flex flex-wrap gap-4">
-              {filteredProducts.length > 0 ? (
-                  filteredProducts.map((product) => (
-                      <div key={product.id} className="border border-gray-300 rounded-lg p-4 w-[calc(33.333%-1rem)] box-border text-center">
-                          <img src={product.productImage} alt={product.productName} className="w-full rounded-lg" />
-                          <h2 className="text-lg font-semibold mt-2">{product.productName}</h2>
-                          <p className="text-blue-500 font-bold">{product.productPrice}</p>
-                          <Button
-                              onClick={() => addToCart(product)}
-                              className="mt-2 px-4 py-2 bg-blue-500 text-black rounded-lg"
-                          >
-                              Thêm vào giỏ hàng
-                          </Button>
-                      </div>
-                  ))
-              ) : (
-                  <p className="text-gray-500">Không tìm thấy sản phẩm nào.</p>
-              )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full">
+                {filteredProducts.length > 0 ? (
+                    filteredProducts.map((product) => (
+                        <div key={product.id}  className="border border-gray-300 rounded-lg p-4">
+                            <img 
+                                src={product.productImage} 
+                                alt={product.productName} 
+                                className="w-full rounded-lg" 
+                            />
+                            <h2 className="text-lg font-semibold mt-2">{product.productName}</h2>
+                            <p className="text-blue-500 font-bold">{product.productPrice}</p>
+                            <Button
+                                onClick={() => addToCart(product)}
+                                className="mt-2 px-4 py-2 bg-blue-500 text-black rounded-lg"
+                            >
+                                Thêm vào giỏ hàng
+                            </Button>
+                        </div>
+                    ))
+                ) : (
+                    <div className="ml-163 w-200">Không có sản phẩm nào</div>
+                )}
             </div>
-            
+
+
             <div
                 className="fixed bottom-6 right-6 bg-blue-500 text-white p-3 rounded-full shadow-lg cursor-pointer flex items-center justify-center"
                 onClick={() => setShowCart(!showCart)}
