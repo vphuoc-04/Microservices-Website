@@ -45,7 +45,8 @@ public class SecurityConfig {
                 
                 permitAll()
                 .requestMatchers(
-                    "/api/v1/user"
+                    "/api/v1/user",
+                    "/api/v1/get_all_user"
                 ).
                 
                 permitAll()
