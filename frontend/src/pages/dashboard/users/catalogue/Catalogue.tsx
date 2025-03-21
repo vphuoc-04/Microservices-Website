@@ -102,7 +102,7 @@ const Catalogue = () => {
                                 <SelectItem value="2">Archived</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Button className="text-black" onClick={handleCreateOrUpdate}>
+                        <Button className="text-white bg-teal-500" onClick={handleCreateOrUpdate}>
                             {editingId !== null ? "Update" : "Create"}
                         </Button>
                     </div>
@@ -110,7 +110,7 @@ const Catalogue = () => {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead><Checkbox disabled /></TableHead>
+                                <TableHead><Checkbox className="border-black" /></TableHead>
                                 <TableHead>ID</TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Status</TableHead>

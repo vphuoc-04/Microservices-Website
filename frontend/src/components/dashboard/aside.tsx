@@ -29,9 +29,9 @@ const Aside = () => {
                                 {group.items.map((item, itemIndex) => (
                                     <AccordionItem key={itemIndex} value={`item-${index}-${itemIndex}`}>
                                         <AccordionTrigger 
-                                            className={`${item.active.includes(segment) ? 'text-[#a3aed1] bg-[rgba(255, 0, 0, 0.05)] !important': ''}`}
+                                            className={`${item.active.includes(segment) ? 'text-[#a3aed1] bg-[rgba(255, 255, 255, 0.05)] !important': ''}`}
                                         >
-                                            <div className="menu-label flex items-center text-black gap-3">
+                                            <div className="menu-label flex items-center text-black gap-3 text-white cursor-pointer border-2 rounded-md w-55 p-3">
                                                 {item.icons}
                                                 <span>{item.label}</span>
                                             </div>

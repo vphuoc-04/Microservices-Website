@@ -58,10 +58,10 @@ const Login = () => {
                             We wish you a good day.
                         </p>
                     </div>
-                    <form onSubmit={handleSubmit(loginHandler)} className="py-10 px-5 h-[300px] rounded-lg bg-white border-2">
+                    <form onSubmit={handleSubmit(loginHandler)} className="py-10 px-5 h-[300px] w-[400px] rounded-lg bg-white border-2">
                         <div className="flex flex-col gap-6">
                             <div className="relative">
-                                <Input className="w-[350px] h-9 border border-gray-300 rounded py-5 px-3 focus:border-teal-500 transition"
+                                <Input className="w-full h-9 border border-gray-300 rounded py-5 px-3 focus:border-teal-500 transition"
                                     id="email"
                                     type="text"
                                     placeholder="Email"
@@ -72,7 +72,7 @@ const Login = () => {
                                 )}
                             </div>
                             <div className="relative">
-                                <Input className="w-[350px] h-9 border border-gray-300 rounded py-5 px-3 focus:border-teal-500 transition"
+                                <Input className="w-full h-9 border border-gray-300 rounded py-5 px-3 focus:border-teal-500 transition"
                                     id="password"
                                     type={show ? "text" : "password"}
                                     placeholder="Password"
@@ -91,8 +91,7 @@ const Login = () => {
                         </div>
                         <div className="mt-6">
                             <Button               
-                                
-                                className="w-full bg-teal-500 text-black py-2 rounded"
+                                className="w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-400 cursor-pointer"
                                 type="submit"
                                 disabled={loading}
                             >

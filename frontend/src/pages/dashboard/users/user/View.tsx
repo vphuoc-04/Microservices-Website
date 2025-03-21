@@ -4,6 +4,7 @@ import { User } from "@/types/User";
 import { getAllUser } from "@/services/UserService";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
     Table, 
@@ -86,6 +87,7 @@ const View: React.FC = () => {
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead><Checkbox className="border-black" /></TableHead>
                                 <TableHead>ID</TableHead>
                                 <TableHead>First Name</TableHead>
                                 <TableHead>Middle Name</TableHead>
@@ -97,6 +99,7 @@ const View: React.FC = () => {
                         <TableBody>
                             {users.map((user) => (
                                 <TableRow key={user.id}>
+                                    <TableCell><Checkbox /></TableCell>
                                     <TableCell>{user.id}</TableCell>
                                     <TableCell>{user.firstName}</TableCell>
                                     <TableCell>{user.middleName}</TableCell>
