@@ -36,6 +36,7 @@ import {
     updateUserCatalogue, 
     deleteUserCatalogue 
 } from "@/services/UserCatalogueService";
+import PageHeading from "@/components/dashboard/heading";
 
 const Catalogue = () => {
     const [userCatalogue, setUserCatalogue] = useState<UserCatalogue[]>([]);
@@ -78,87 +79,95 @@ const Catalogue = () => {
         }
     };
 
-    return (
-        <div className="container">
-            <Card>
-                <CardHeader>
-                    <CardTitle>User Catalogue</CardTitle>
-                    <CardDescription>Manage user catalogues</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex gap-2 mb-4">
-                        <Input
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="User catalogue name..."
-                        />
-                        <Select value={publish} onValueChange={setPublish}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="0">Inactive</SelectItem>
-                                <SelectItem value="1">Active</SelectItem>
-                                <SelectItem value="2">Archived</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Button className="text-white bg-teal-500" onClick={handleCreateOrUpdate}>
-                            {editingId !== null ? "Update" : "Create"}
-                        </Button>
-                    </div>
+    const breadcrumb = {
+        title: "Quản lý nhóm người dùng",
+        route: "/admin/user/catalogue"
+    }
 
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead><Checkbox className="border-black" /></TableHead>
-                                <TableHead>ID</TableHead>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Created by</TableHead>
-                                <TableHead>Updated by</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {userCatalogue.length > 0 ? (
-                                userCatalogue.map((catalogue) => (
-                                    <TableRow key={catalogue.id}>
-                                        <TableCell><Checkbox /></TableCell>
-                                        <TableCell>{catalogue.id}</TableCell>
-                                        <TableCell>{catalogue.name}</TableCell>
-                                        <TableCell>
-                                            {catalogue.publish === 0 ? "Inactive" : catalogue.publish === 1 ? "Active" : "Archived"}
-                                        </TableCell>
-                                        <TableCell>{catalogue.createdBy}</TableCell>
-                                        <TableCell>{catalogue.updatedBy}</TableCell>
-                                        <TableCell>
-                                            <Button variant="outline" size="sm" onClick={() => handleEdit(catalogue)}>Edit</Button>
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm" 
-                                                className="text-red-500 border-red-500 ml-2"
-                                                onClick={() => handleDelete(catalogue.id)}
-                                            >
-                                                Delete
-                                            </Button>
+    return (
+        <>
+            <PageHeading breadcrumb=  { breadcrumb } />
+            <div className="container p-3">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>User Catalogue</CardTitle>
+                        <CardDescription>Manage user catalogues</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex gap-2 mb-4">
+                            <Input
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="User catalogue name..."
+                            />
+                            <Select value={publish} onValueChange={setPublish}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="0">Inactive</SelectItem>
+                                    <SelectItem value="1">Active</SelectItem>
+                                    <SelectItem value="2">Archived</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Button className="text-white bg-teal-500" onClick={handleCreateOrUpdate}>
+                                {editingId !== null ? "Update" : "Create"}
+                            </Button>
+                        </div>
+
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead><Checkbox className="border-black" /></TableHead>
+                                    <TableHead>ID</TableHead>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Created by</TableHead>
+                                    <TableHead>Updated by</TableHead>
+                                    <TableHead>Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {userCatalogue.length > 0 ? (
+                                    userCatalogue.map((catalogue) => (
+                                        <TableRow key={catalogue.id}>
+                                            <TableCell><Checkbox /></TableCell>
+                                            <TableCell>{catalogue.id}</TableCell>
+                                            <TableCell>{catalogue.name}</TableCell>
+                                            <TableCell>
+                                                {catalogue.publish === 0 ? "Inactive" : catalogue.publish === 1 ? "Active" : "Archived"}
+                                            </TableCell>
+                                            <TableCell>{catalogue.createdBy}</TableCell>
+                                            <TableCell>{catalogue.updatedBy}</TableCell>
+                                            <TableCell>
+                                                <Button variant="outline" size="sm" onClick={() => handleEdit(catalogue)}>Edit</Button>
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="sm" 
+                                                    className="text-red-500 border-red-500 ml-2"
+                                                    onClick={() => handleDelete(catalogue.id)}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={7} className="text-center">
+                                            No data
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={7} className="text-center">
-                                        No data
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-                <CardFooter>
-                    <p>User catalogue management</p>
-                </CardFooter>
-            </Card>
-        </div>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                    <CardFooter>
+                        <p>User catalogue management</p>
+                    </CardFooter>
+                </Card>
+            </div>
+        </>
     );
 };
 

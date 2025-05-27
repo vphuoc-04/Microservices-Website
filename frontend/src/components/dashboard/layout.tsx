@@ -27,7 +27,7 @@ const Layout: React.FC = () => {
             <Aside />
             <div className="flex-1 bg-gray-100 flex flex-col">
                 <Header />
-                <div className="p-3">
+                <div>
                     <Outlet />
                 </div>
             </div>

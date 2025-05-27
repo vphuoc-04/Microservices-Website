@@ -7,6 +7,7 @@ import { showToast } from "../../helpers/myHelper";
 // Redux
 import { RootState } from "../../redux/store";
 import { clearToast } from "../../redux/slice/toastSlice";
+import PageHeading from "@/components/dashboard/heading";
 
 const Dashboard = () => {
     const { message, type } = useSelector((state: RootState) => state.toast);
@@ -18,9 +19,14 @@ const Dashboard = () => {
         dispatch(clearToast())
     }, [message, type, dispatch])
 
+    const breadcrumb = {
+        title: "Thống kê chung",
+        route: '/admin/dashboard'
+    }
+
     return (
         <div>
-            Dashboard
+            <PageHeading breadcrumb = { breadcrumb }/>
         </div>
     )
 }

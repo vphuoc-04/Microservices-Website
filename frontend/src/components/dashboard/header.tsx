@@ -46,7 +46,7 @@ const Header = () => {
     }
 
     return (
-        <div className="bg-white h-12 flex justify-end pr-5 relative">
+        <div className="bg-white h-12 flex justify-end pr-5 relative shadow-md">
             <div className="relative mt-1 mr-10 cursor-pointer">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

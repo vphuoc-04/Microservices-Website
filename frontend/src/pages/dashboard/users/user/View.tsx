@@ -23,6 +23,7 @@ import {
     PaginationEllipsis, 
     PaginationLink 
 } from "@/components/ui/pagination";
+import PageHeading from "@/components/dashboard/heading";
 
 const MAX_VISIBLE_PAGES = 5; 
 const generatePageNumbers = (currentPage: number, totalPages: number) => {
@@ -69,76 +70,84 @@ const View: React.FC = () => {
     }, [currentPage, sort]);
 
     const pageNumbers = generatePageNumbers(currentPage, totalPages);
+
+    const breadcrumb = {
+        title: "Quản lý người dùng",
+        route: "/admin/user/index"
+    }
     
     return (
-        <div className="container">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-xl font-bold">User List</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="mb-4 flex gap-2">
-                        <Button variant="outline" onClick={() => setSort("id,asc")}>Sort by ID ↑</Button>
-                        <Button variant="outline" onClick={() => setSort("id,desc")}>Sort by ID ↓</Button>
-                        <Button variant="outline" onClick={() => setSort("firstName,asc")}>Sort by Name ↑</Button>
-                        <Button variant="outline" onClick={() => setSort("firstName,desc")}>Sort by Name ↓</Button>
-                    </div>
-                    
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead><Checkbox className="border-black" /></TableHead>
-                                <TableHead>ID</TableHead>
-                                <TableHead>First Name</TableHead>
-                                <TableHead>Middle Name</TableHead>
-                                <TableHead>Last Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Phone</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {users.map((user) => (
-                                <TableRow key={user.id}>
-                                    <TableCell><Checkbox /></TableCell>
-                                    <TableCell>{user.id}</TableCell>
-                                    <TableCell>{user.firstName}</TableCell>
-                                    <TableCell>{user.middleName}</TableCell>
-                                    <TableCell>{user.lastName}</TableCell>
-                                    <TableCell>{user.email}</TableCell>
-                                    <TableCell>{user.phone}</TableCell>
+        <>
+            <PageHeading breadcrumb = {breadcrumb} />
+            <div className="container p-3">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-xl font-bold">User List</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="mb-4 flex gap-2">
+                            <Button variant="outline" onClick={() => setSort("id,asc")}>Sort by ID ↑</Button>
+                            <Button variant="outline" onClick={() => setSort("id,desc")}>Sort by ID ↓</Button>
+                            <Button variant="outline" onClick={() => setSort("firstName,asc")}>Sort by Name ↑</Button>
+                            <Button variant="outline" onClick={() => setSort("firstName,desc")}>Sort by Name ↓</Button>
+                        </div>
+                        
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead><Checkbox className="border-black" /></TableHead>
+                                    <TableHead>ID</TableHead>
+                                    <TableHead>First Name</TableHead>
+                                    <TableHead>Middle Name</TableHead>
+                                    <TableHead>Last Name</TableHead>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>Phone</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                    
-                    <div className="flex justify-center items-center mt-4 cursor-pointer">
-                        <Pagination>
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} />
-                                </PaginationItem>
-
-                                {pageNumbers.map((page, index) => (
-                                    <PaginationItem key={index}>
-                                        {typeof page === "string" ? (
-                                            <PaginationEllipsis />
-                                        ) : (
-                                            <PaginationLink isActive={currentPage === page} onClick={() => setCurrentPage(Number(page))}>
-                                                {page}
-                                            </PaginationLink>
-                                        )}
-                                    </PaginationItem>
+                            </TableHeader>
+                            <TableBody>
+                                {users.map((user) => (
+                                    <TableRow key={user.id}>
+                                        <TableCell><Checkbox /></TableCell>
+                                        <TableCell>{user.id}</TableCell>
+                                        <TableCell>{user.firstName}</TableCell>
+                                        <TableCell>{user.middleName}</TableCell>
+                                        <TableCell>{user.lastName}</TableCell>
+                                        <TableCell>{user.email}</TableCell>
+                                        <TableCell>{user.phone}</TableCell>
+                                    </TableRow>
                                 ))}
+                            </TableBody>
+                        </Table>
+                        
+                        <div className="flex justify-center items-center mt-4 cursor-pointer">
+                            <Pagination>
+                                <PaginationContent>
+                                    <PaginationItem>
+                                        <PaginationPrevious onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} />
+                                    </PaginationItem>
 
-                                <PaginationItem>
-                                    <PaginationNext onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+                                    {pageNumbers.map((page, index) => (
+                                        <PaginationItem key={index}>
+                                            {typeof page === "string" ? (
+                                                <PaginationEllipsis />
+                                            ) : (
+                                                <PaginationLink isActive={currentPage === page} onClick={() => setCurrentPage(Number(page))}>
+                                                    {page}
+                                                </PaginationLink>
+                                            )}
+                                        </PaginationItem>
+                                    ))}
+
+                                    <PaginationItem>
+                                        <PaginationNext onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} />
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </>
     );
 };
 
