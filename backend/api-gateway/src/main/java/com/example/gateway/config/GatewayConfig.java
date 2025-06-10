@@ -13,6 +13,15 @@ public class GatewayConfig {
                     .route("auth-service", r -> r
                         .path("/api/v1/auth/**")
                         .uri("lb://auth-service"))
+
+                    .route("user-catalogue-service", r -> r
+                        .path("/api/v1/user_catalogue/**")
+                        .uri("lb://user-catalogue-service"))
+                        
+                    .route("user-service", r -> r
+                        .path("/api/v1/user/**")
+                        .uri("lb://user-service"))
+                        
                     .build();
     }
 }
