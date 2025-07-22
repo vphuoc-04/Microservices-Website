@@ -1,10 +1,8 @@
 package com.example.common_lib.configs;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,8 +14,8 @@ import com.example.common_lib.helpers.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@Configuration
-@EnableWebSecurity
+// @Configuration
+// @EnableWebSecurity
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
 
@@ -37,21 +35,12 @@ public class SecurityConfig {
                     "/api/v1/auth/login",
                     "/api/v1/auth/refresh_token"
                 ).
-                
-                permitAll()
-                .requestMatchers(
-                    "/api/v1/user",
-                    "/api/v1/get_all_user"
-                ).
-                
                 permitAll()
 
                 .requestMatchers(
-                    "/api/v1/add_to_cart",
-                    "/api/v1/get_cart_data/{userId}",
-                    "/api/v1/remove_from_cart/{id}"
+                    "/api/v1/users/me",
+                    "/api/v1/users/get_all_user"
                 ).
-                
                 permitAll()
 
                 .anyRequest().authenticated()
@@ -63,16 +52,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-    // @Bean
-    // public CorsFilter corsFilter() {
-    //     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    //     CorsConfiguration config = new CorsConfiguration();
-    //     config.addAllowedOrigin("http://localhost:5173");
-    //     config.addAllowedHeader("*");
-    //     config.addAllowedMethod("*");
-    //     config.setAllowCredentials(true);
-    //     source.registerCorsConfiguration("/**", config);
-    //     return new CorsFilter(source);
-    // }
 }

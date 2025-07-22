@@ -1,16 +1,16 @@
 package com.example.auth_service.resources;
 
-import com.example.user_service.resources.UserResource;
+import com.example.common_lib.dtos.UserDto;
 
 public class LoginResource {
     private final String token;
     private final String refreshToken;
-    private final UserResource user;
+    private final UserDto user;
 
     public LoginResource(
         String token,
         String refreshToken,
-        UserResource user
+        UserDto user
     ){
         this.token = token;
         this.refreshToken = refreshToken;
@@ -25,7 +25,7 @@ public class LoginResource {
         return refreshToken;
     }
 
-    public UserResource getUser() {
+    public UserDto getUser() {
         return user;
     }
 }

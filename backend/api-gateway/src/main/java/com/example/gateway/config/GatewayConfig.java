@@ -19,7 +19,7 @@ public class GatewayConfig {
                         .uri("lb://user-catalogue-service"))
                         
                     .route("user-service", r -> r
-                        .path("/api/v1/user/**")
+                        .path("/api/v1/users/**")
                         .uri("lb://user-service"))
                         
                     .build();

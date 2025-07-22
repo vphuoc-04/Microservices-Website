@@ -1,118 +1,30 @@
 package com.example.user_service.services.impl;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.common_lib.dtos.UserDto;
+import com.example.common_lib.services.BaseService;
 import com.example.user_service.entities.User;
 import com.example.user_service.repositories.UserRepository;
-
-import com.example.user_catalogue_service.entities.UserCatalogue;
-import com.example.user_catalogue_service.repositories.UserCatalogueRepository;
-import com.example.user_service.resources.UserResource;
 import com.example.user_service.services.interfaces.UserServiceInterface;
 
-import com.example.auth_service.requests.LoginRequest;
-import com.example.auth_service.requests.RegisterRequest;
-import com.example.auth_service.resources.LoginResource;
-
-import com.example.common_lib.resources.ApiResource;
-import com.example.common_lib.services.BaseService;
-import com.example.common_lib.services.JwtService;
-
 @Service
-public class UserService extends BaseService implements UserServiceInterface {
+public class UserService extends BaseService implements UserServiceInterface, UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private UserCatalogueRepository userCatalogueRepository;
-
-    @Autowired 
-    private JwtService jwtService;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Value("${jwt.defaultExpiration}")
-    private Long defaultExpiration;
-
-    @Override
-    public Object validateRegistration(RegisterRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ApiResource.error("EMAIL_EXISTS", "Email already in use", HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-        
-        if (userRepository.findByPhone(request.getPhone()).isPresent()) {
-            return ApiResource.error("PHONE_EXISTS", "Phone already in use", HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-
-        Long catalogueId = userCatalogueRepository.findByName("Customers")
-            .map(UserCatalogue::getId)
-            .orElseThrow(() -> new RuntimeException("Catalogue 'Customers' not found"));
-
-        User user = new User();
-            user.setFirstName(request.getFirstName());
-            user.setMiddleName(request.getMiddleName());
-            user.setLastName(request.getLastName());
-            user.setEmail(request.getEmail());
-            user.setPhone(request.getPhone());
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setCatalogueId(catalogueId);
-
-        userRepository.save(user);
-
-        UserResource userResource = UserResource.builder()
-            .id(user.getId())
-            .firstName(user.getFirstName())
-            .middleName(user.getMiddleName())
-            .lastName(user.getLastName())
-            .email(user.getEmail())
-            .phone(user.getPhone())
-            .catalogueId(user.getCatalogueId())
-            .build();
-
-        return ApiResource.ok(userResource, "User registered successfully");
-    }
-
-    @Override
-    public Object authenticate(LoginRequest request) {
-        try {
-            User user = userRepository.findByEmail(request.getEmail()).orElseThrow(
-                () -> new BadCredentialsException("Incorrect email or passowrd")
-            );
-
-            if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                throw new BadCredentialsException("Incorrect email or password");
-            }
-
-            UserResource userResource = UserResource.builder()
-                .id(user.getId())
-                .firstName(user.getFirstName())
-                .middleName(user.getMiddleName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .build();
-
-            String token = jwtService.generateToken(user.getId(), user.getEmail(), defaultExpiration);
-            String refreshToken = jwtService.generateRefreshToken(user.getId(), user.getEmail());
-
-            return new LoginResource(token, refreshToken, userResource);
-
-        } catch (BadCredentialsException e) {
-            return ApiResource.error("AUTH_ERROR", e.getMessage(), HttpStatus.UNAUTHORIZED);
-        }
-    }
 
     @Override
     public Page<User> paginate(Map<String, String[]> parameters) {
@@ -124,5 +36,73 @@ public class UserService extends BaseService implements UserServiceInterface {
         Pageable pageable = PageRequest.of(page - 1, perpage, sort);
 
         return userRepository.findAll(pageable);
+    }
+
+    @Override
+    public UserDto getUserById(Long id) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            UserDto userDto = new UserDto();
+            userDto.setId(user.getId());
+            userDto.setEmail(user.getEmail());
+            userDto.setFirstName(user.getFirstName());
+            userDto.setLastName(user.getLastName());
+            userDto.setMiddleName(user.getMiddleName());
+            userDto.setPhone(user.getPhone());
+            return userDto;
+        }
+        return null;
+    }
+
+    @Override
+    public UserDto getUserById(Long id, String accessToken) {
+        return getUserById(id);
+    }
+
+    @Override
+    public com.example.common_lib.dtos.UserDto getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return null;
+        }
+        return convertToDto(user);
+    }
+
+    @Override
+    public boolean validateUserCredentials(String email, String password) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return false;
+        }
+        return passwordEncoder.matches(password, user.getPassword());
+    }
+
+    @Override
+    public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String username) throws org.springframework.security.core.userdetails.UsernameNotFoundException {
+        User user = userRepository.findByEmail(username).orElse(null);
+        if (user == null) {
+            throw new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found with email: " + username);
+        }
+        return new org.springframework.security.core.userdetails.User(
+            user.getEmail(),
+            user.getPassword(),
+            java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("USER"))
+        );
+    }
+
+    private com.example.common_lib.dtos.UserDto convertToDto(User user) {
+        com.example.common_lib.dtos.UserDto dto = new com.example.common_lib.dtos.UserDto();
+        dto.setId(user.getId());
+        dto.setCatalogueId(user.getCatalogueId());
+        dto.setFirstName(user.getFirstName());
+        dto.setMiddleName(user.getMiddleName());
+        dto.setLastName(user.getLastName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setImg(user.getImg());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
+        return dto;
     }
 }

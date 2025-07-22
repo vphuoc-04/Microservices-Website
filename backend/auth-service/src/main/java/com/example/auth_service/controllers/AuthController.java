@@ -20,15 +20,17 @@ import com.example.auth_service.requests.BlacklistedTokenRequest;
 import com.example.auth_service.requests.LoginRequest;
 import com.example.auth_service.requests.RefreshTokenRequest;
 import com.example.auth_service.requests.RegisterRequest;
-import com.example.auth_service.resources.LoginResource;
 import com.example.auth_service.resources.RefreshTokenResource;
+import com.example.auth_service.services.AuthService;
 import com.example.auth_service.services.impl.BlacklistedTokenService;
 import com.example.auth_service.services.interfaces.UserServiceInterface;
-
 import com.example.common_lib.configs.JwtConfig;
+import com.example.common_lib.dtos.AuthResponse;
+import com.example.common_lib.dtos.UserDto;
 import com.example.common_lib.resources.ApiResource;
 import com.example.common_lib.services.JwtService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -41,6 +43,9 @@ public class AuthController {
 
     @Autowired 
     private JwtService jwtService;
+
+    @Autowired
+    private AuthService authService;
 
     @Autowired
     private JwtConfig jwtConfig;
@@ -56,87 +61,61 @@ public class AuthController {
 
     @PostMapping("register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        Object result = userService.validateRegistration(registerRequest);
-
-        if (result instanceof ApiResource<?> apiResource) {
-            if (apiResource.getError() != null) {
-                String errorCode = apiResource.getError().getCode();
-                
-                if ("EMAIL_EXISTS".equals(errorCode) || "PHONE_EXISTS".equals(errorCode)) {
-                    return ResponseEntity.unprocessableEntity().body(apiResource);
-                }
-            }
-            return ResponseEntity.ok(apiResource);
-        }
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error");
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Register endpoint should be handled by user service");
     }
 
     @PostMapping("login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        Object result = userService.authenticate(request);
-        if (result instanceof LoginResource loginResource) {
-            ResponseCookie cookie = ResponseCookie.from("cookies", loginResource.getToken())
+        try {
+            boolean isValid = userService.validateUserCredentials(request.getEmail(), request.getPassword());
+            if (!isValid) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResource.message("Invalid credentials", HttpStatus.UNAUTHORIZED));
+            }
+            UserDto user = userService.getUserByEmail(request.getEmail());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResource.message("User not found", HttpStatus.UNAUTHORIZED));
+            }
+            // Generate tokens
+            String accessToken = jwtService.generateToken(user.getId(), user.getEmail(), null);
+            String refreshToken = authService.generateRefreshToken(user.getId(), user.getEmail());
+            // Create response
+            AuthResponse authResponse = new AuthResponse();
+            authResponse.setToken(accessToken);
+            authResponse.setRefreshToken(refreshToken);
+            authResponse.setExpiresIn(jwtConfig.getExpirationTime());
+            authResponse.setUser(user);
+            ResponseCookie cookie = ResponseCookie.from("cookies", accessToken)
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Strict")
                 .path("/")
-                .maxAge(Duration.ofMillis(jwtConfig.getExpirationTime())) 
+                .maxAge(Duration.ofMillis(jwtConfig.getExpirationTime()))
                 .build();
-
-            ApiResource<LoginResource> response = ApiResource.ok(loginResource, "SUCCESS");
-
             return ResponseEntity.ok()
-                .header("Set-Cookie", cookie.toString()) 
-                .body(response);
+                .header("Set-Cookie", cookie.toString())
+                .body(ApiResource.ok(authResponse, "SUCCESS"));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(ApiResource.message("Login failed", HttpStatus.INTERNAL_SERVER_ERROR));
         }
-        if (result instanceof ApiResource apiResource) {
-            return ResponseEntity.unprocessableEntity().body(apiResource);
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Network error");
     }
 
     @PostMapping("blacklisted_token")
     public ResponseEntity<?> addTokenToBlacklist(@Valid @RequestBody BlacklistedTokenRequest request) {
         try {
             Object result = blacklistedTokenService.create(request);
-
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(ApiResource.message("NETWORK_ERROR", HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
 
-    @GetMapping("logout") 
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String bearerToken) {
-        try {
-            String token = bearerToken.substring(7);
-
-            BlacklistedTokenRequest request = new BlacklistedTokenRequest();
-            request.setToken(token);
-    
-            Object message = blacklistedTokenService.create(request);
-
-            ResponseCookie clearCookie = ResponseCookie.from("cookies", "")
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
-                .path("/")
-                .maxAge(0)
-                .build();
-
-
-            return ResponseEntity.ok().header("Set-Cookie", clearCookie.toString()).body(message);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(ApiResource.message("NETWORK_ERROR", HttpStatus.UNAUTHORIZED));
-        }
-    }
-
     @PostMapping("refresh_token")
-    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest request, HttpServletRequest httpRequest) {
         String refreshToken = request.getRefreshToken();
 
-        if (!jwtService.isRefreshTokenValid(refreshToken)) {
+        if (!authService.isRefreshTokenValid(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResource.message("Refresh token is invalid", HttpStatus.UNAUTHORIZED));
         }
 
@@ -145,10 +124,21 @@ public class AuthController {
         if(dbRefreshTokenOptional.isPresent()) {
             RefreshToken dbRefreshToken = dbRefreshTokenOptional.get();
             Long userId = dbRefreshToken.getUserId();
-            String email = dbRefreshToken.getUser().getEmail();
+            String accessToken = httpRequest.getHeader("Authorization");
+            if (accessToken == null || accessToken.isEmpty()) {
+                // Nếu không có token, sinh mới cho userId
+                // Lưu ý: chỉ nên làm nếu bạn chắc chắn userId hợp lệ và bảo mật
+                accessToken = "Bearer " + jwtService.generateToken(userId, "", null);
+            }
+            UserDto user = ((com.example.auth_service.services.impl.UserService) userService).getUserById(userId, accessToken);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResource.message("User not found", HttpStatus.UNAUTHORIZED));
+            }
+            String email = user.getEmail();
 
             String newToken = jwtService.generateToken(userId, email, null);
-            String newRefreshToken = jwtService.generateRefreshToken(userId, email);
+            String newRefreshToken = authService.generateRefreshToken(userId, email);
 
             ResponseCookie accessTokenCookie = ResponseCookie.from("cookies", newToken)
                 .httpOnly(true)
@@ -163,5 +153,33 @@ public class AuthController {
             return ResponseEntity.ok().header("Set-Cookie", accessTokenCookie.toString()).body(response);
         }
         return ResponseEntity.internalServerError().body(ApiResource.message("NETWORK_ERROR", HttpStatus.INTERNAL_SERVER_ERROR));
+    }
+
+    @GetMapping("logout") 
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String bearerToken) {
+        try {
+            String token = bearerToken.substring(7);
+
+            // Get user ID from token
+            String userIdStr = jwtService.getUserIdFromJwt(token);
+            Long userId = Long.parseLong(userIdStr);
+
+            // Blacklist the token
+            authService.blacklistToken(token, userId, "LOGOUT");
+
+            ResponseCookie clearCookie = ResponseCookie.from("cookies", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+            return ResponseEntity.ok()
+                .header("Set-Cookie", clearCookie.toString())
+                .body(ApiResource.message("Logout successful", HttpStatus.OK));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(ApiResource.message("NETWORK_ERROR", HttpStatus.UNAUTHORIZED));
+        }
     }
 }

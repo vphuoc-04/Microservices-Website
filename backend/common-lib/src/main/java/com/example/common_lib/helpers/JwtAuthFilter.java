@@ -7,11 +7,10 @@ import java.util.Map;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.common_lib.modules.users.services.impl.CustomUserDetailsService;
 import com.example.common_lib.services.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -21,23 +20,30 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
-import lombok.RequiredArgsConstructor;
 
-@Component
-@RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-    private final CustomUserDetailsService customUserDetailService;
+    private final UserDetailsService userDetailsService;
     private final ObjectMapper objectMapper;
+    private final TokenValidator tokenValidator;
+
+    public JwtAuthFilter(JwtService jwtService, UserDetailsService userDetailsService, ObjectMapper objectMapper, TokenValidator tokenValidator) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+        this.objectMapper = objectMapper;
+        this.tokenValidator = tokenValidator;
+    }
     
     @Override
-    protected boolean shouldNotFilter(
-        @NonNull HttpServletRequest request
-    ){
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/api/v1/auth/login") ||
+        boolean skip = path.startsWith("/api/v1/auth/login") ||
             path.startsWith("/api/v1/auth/refresh_token") ||
-            path.startsWith("/api/v1/auth/register");
+            path.startsWith("/api/v1/auth/register") ||
+            path.startsWith("/api/v1/users/validate") ||
+            path.startsWith("/api/v1/users/email/");
+        System.out.println("[JwtAuthFilter] shouldNotFilter path: " + path + " => " + skip);
+        return skip;
     }
 
     @Override
@@ -105,7 +111,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if(jwtService.isBlacklistedToken(jwt)){
+            if (tokenValidator.isBlacklisted(jwt)) {
                 sendErrorResponse(response, 
                     request, 
                     HttpServletResponse.SC_UNAUTHORIZED, 
@@ -118,16 +124,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             userId = jwtService.getUserIdFromJwt(jwt);
     
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = customUserDetailService.loadUserByUsername(userId);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
 
                 final String emailFromToken = jwtService.getEmailFromJwt(jwt);
                 if (!emailFromToken.equals(userDetails.getUsername())){
-                    sendErrorResponse(response, 
-                        request, 
-                        HttpServletResponse.SC_UNAUTHORIZED, 
-                        "Authentication failed!", 
-                        "User token invalid!"
-                    );
+                    // Nếu userDetails là dummy (password rỗng), bỏ qua so sánh
+                    if (userDetails.getPassword() == null || userDetails.getPassword().isEmpty()) {
+                        // skip check
+                    } else {
+                        sendErrorResponse(response, 
+                            request, 
+                            HttpServletResponse.SC_UNAUTHORIZED, 
+                            "Authentication failed!", 
+                            "User token invalid!"
+                        );
+                        return;
+                    }
                 }
     
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
@@ -152,6 +164,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 "Network Error!", 
                 e.getMessage()
             );
+            return;
         }
     }
 

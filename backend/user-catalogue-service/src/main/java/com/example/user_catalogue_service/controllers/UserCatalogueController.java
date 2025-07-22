@@ -28,7 +28,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1/user_catalogue")
 public class UserCatalogueController {
     private final UserCatalogueServiceInterface userCatagoluesService;
 
@@ -43,8 +43,8 @@ public class UserCatalogueController {
         this.jwtService = jwtService;
     }
 
-    @GetMapping("/user_catalogue")
-    public ResponseEntity<?> index(HttpServletRequest request) {
+    @GetMapping("/get_all_catalogue")
+    public ResponseEntity<?> getAllCatalogues(HttpServletRequest request) {
         Map<String, String[]> parameters = request.getParameterMap();
 
         Page<UserCatalogue> userCatalogues = userCatagoluesService.paginate(parameters);
@@ -64,8 +64,8 @@ public class UserCatalogueController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/user_catalogue")
-    public ResponseEntity<?> store(@Valid @RequestBody StoreRequest request, @RequestHeader("Authorization") String bearerToken) {
+    @PostMapping("/create_catalogue")
+    public ResponseEntity<?> createCatalogue(@Valid @RequestBody StoreRequest request, @RequestHeader("Authorization") String bearerToken) {
         try {
             String token = bearerToken.substring(7);
 
@@ -92,8 +92,8 @@ public class UserCatalogueController {
         }
     }
 
-    @PutMapping("/user_catalogue/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody UpdateRequest request, @RequestHeader("Authorization") String bearerToken) {
+    @PutMapping("/update_catalogue/{id}")
+    public ResponseEntity<?> updateCatalogue(@PathVariable Long id, @Valid @RequestBody UpdateRequest request, @RequestHeader("Authorization") String bearerToken) {
         try {
             String token = bearerToken.substring(7);
 
@@ -125,8 +125,8 @@ public class UserCatalogueController {
         }   
     }
 
-    @DeleteMapping("/user_catalogue/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    @DeleteMapping("/delete_catalogue/{id}")
+    public ResponseEntity<?> deleteCatalogue(@PathVariable Long id) {
         try {
             boolean deleted = userCatagoluesService.delete(id);
 
