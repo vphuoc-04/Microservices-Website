@@ -90,6 +90,19 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<configuration>
+					<url>jdbc:mysql://MySQL-8.2:3306/e_commerce_marketplace</url>
+					<user>root</user>
+					<password>root</password>
+					<schemas>e_commerce_marketplace</schemas>
+					<locations>
+						<location>classpath:database/migrations</location>
+					</locations>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

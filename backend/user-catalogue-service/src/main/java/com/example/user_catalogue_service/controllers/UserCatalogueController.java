@@ -3,8 +3,12 @@ package com.example.user_catalogue_service.controllers;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,10 +19,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
+import com.example.common_lib.annotations.RequirePermission;
 import com.example.common_lib.resources.ApiResource;
 import com.example.common_lib.services.JwtService;
 import com.example.user_catalogue_service.entities.UserCatalogue;
+import com.example.user_catalogue_service.repositories.UserCatalogueRepository;
 import com.example.user_catalogue_service.requests.StoreRequest;
 import com.example.user_catalogue_service.requests.UpdateRequest;
 import com.example.user_catalogue_service.resources.UserCatalogueResource;
@@ -27,13 +34,25 @@ import com.example.user_catalogue_service.services.interfaces.UserCatalogueServi
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1/user_catalogue")
 public class UserCatalogueController {
     private final UserCatalogueServiceInterface userCatagoluesService;
 
     @Autowired
+    private UserCatalogueRepository userCatalogueRepository;
+
+    @Autowired
     private JwtService jwtService;
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Value("${permission.service.url:http://localhost:8084}")
+    private String permissionServiceUrl;
+    
+    @Value("${user.service.url:http://localhost:8082}")
+    private String userServiceUrl;
 
     public UserCatalogueController(
         UserCatalogueServiceInterface userCatagoluesService,
@@ -44,6 +63,7 @@ public class UserCatalogueController {
     }
 
     @GetMapping("/get_all_catalogue")
+    @RequirePermission(action = "user_catalogue:get_all")
     public ResponseEntity<?> getAllCatalogues(HttpServletRequest request) {
         Map<String, String[]> parameters = request.getParameterMap();
 
@@ -52,8 +72,8 @@ public class UserCatalogueController {
         Page<UserCatalogueResource> userCatalogueResource = userCatalogues.map(userCatalogue -> 
             UserCatalogueResource.builder()
                 .id(userCatalogue.getId())
-                .createdBy(userCatalogue.getCreatedBy())
-                .updatedBy(userCatalogue.getUpdatedBy())
+                .addedBy(userCatalogue.getAddedBy())
+                .editedBy(userCatalogue.getEditedBy())
                 .name(userCatalogue.getName())
                 .publish(userCatalogue.getPublish())
                 .build()
@@ -65,48 +85,75 @@ public class UserCatalogueController {
     }
 
     @PostMapping("/create_catalogue")
-    public ResponseEntity<?> createCatalogue(@Valid @RequestBody StoreRequest request, @RequestHeader("Authorization") String bearerToken) {
-        try {
-            String token = bearerToken.substring(7);
+    @RequirePermission(action = "user_catalogue:create")
+    public ResponseEntity<?> createCatalogue(@RequestBody StoreRequest request, @RequestHeader("Authorization") String bearerToken) {
+        String token = bearerToken.substring(7);
+        String userId = jwtService.getUserIdFromJwt(token);
+        Long addedBy = Long.valueOf(userId);
+        UserCatalogue catalogue = UserCatalogue.builder()
+            .name(request.getName())
+            .publish(request.getPublish())
+            .addedBy(addedBy)
+            .build();
+        userCatalogueRepository.save(catalogue);
 
-            String userId = jwtService.getUserIdFromJwt(token);
+        // Gán quyền cho catalogue
+        String permUrl = permissionServiceUrl + "/api/v1/user_catalogue_permission";
+        HttpHeaders permHeaders = new HttpHeaders();
+        permHeaders.setContentType(MediaType.APPLICATION_JSON);
+        permHeaders.set("Authorization", bearerToken);
+        Map<String, Object> permBody = Map.of(
+            "catalogueId", catalogue.getId(),
+            "permissionIds", request.getPermissions()
+        );
+        HttpEntity<Map<String, Object>> permEntity = new HttpEntity<>(permBody, permHeaders);
+        restTemplate.postForEntity(permUrl, permEntity, Void.class);
 
-            Long createdBy = Long.valueOf(userId);
+        // Gán user vào catalogue
+        String userUrl = userServiceUrl + "/api/v1/user_catalogue_user";
+        HttpHeaders userHeaders = new HttpHeaders();
+        userHeaders.setContentType(MediaType.APPLICATION_JSON);
+        userHeaders.set("Authorization", bearerToken);
+        Map<String, Object> userBody = Map.of(
+            "catalogueId", catalogue.getId(),
+            "userIds", request.getUsers() 
+        );
+        HttpEntity<Map<String, Object>> userEntity = new HttpEntity<>(userBody, userHeaders);
+        restTemplate.postForEntity(userUrl, userEntity, Void.class);
 
-            UserCatalogue userCatalogue = userCatagoluesService.create(request, createdBy);
+        UserCatalogueResource userCatalogueResource = UserCatalogueResource.builder()
+            .id(catalogue.getId())
+            .addedBy(catalogue.getAddedBy())
+            .editedBy(catalogue.getEditedBy())
+            .name(catalogue.getName())
+            .publish(catalogue.getPublish())
+            .build();
 
-            UserCatalogueResource userCatalogueResource = UserCatalogueResource.builder()
-                .id(userCatalogue.getId())
-                .createdBy(userCatalogue.getCreatedBy())
-                .updatedBy(userCatalogue.getUpdatedBy())
-                .name(userCatalogue.getName())
-                .publish(userCatalogue.getPublish())
-                .build();
+        ApiResource<UserCatalogueResource> response = ApiResource.ok(userCatalogueResource, "User catalogue created successfully");
 
-            ApiResource<UserCatalogueResource> response = ApiResource.ok(userCatalogueResource, "New user catalogue added successfully");
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(ApiResource.message("Network error", HttpStatus.UNAUTHORIZED));
-        }
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/update_catalogue/{id}")
+    @RequirePermission(action = "user_catalogue:update")
     public ResponseEntity<?> updateCatalogue(@PathVariable Long id, @Valid @RequestBody UpdateRequest request, @RequestHeader("Authorization") String bearerToken) {
         try {
             String token = bearerToken.substring(7);
-
             String userId = jwtService.getUserIdFromJwt(token);
+            Long editedBy = Long.valueOf(userId);
 
-            Long updatedBy = Long.valueOf(userId);
+            UserCatalogue userCatalogue = userCatalogueRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User catalogue not found"));
 
-            UserCatalogue userCatalogue = userCatagoluesService.update(id, request, updatedBy);
-            
+            userCatalogue.setName(request.getName());
+            userCatalogue.setPublish(request.getPublish());
+            userCatalogue.setEditedBy(editedBy);
+            userCatalogueRepository.save(userCatalogue);
+
             UserCatalogueResource userCatalogueResource = UserCatalogueResource.builder()
                 .id(userCatalogue.getId())
-                .createdBy(userCatalogue.getCreatedBy())
-                .updatedBy(userCatalogue.getUpdatedBy())
+                .addedBy(userCatalogue.getAddedBy())
+                .editedBy(userCatalogue.getEditedBy())
                 .name(userCatalogue.getName())
                 .publish(userCatalogue.getPublish())
                 .build();
@@ -126,20 +173,20 @@ public class UserCatalogueController {
     }
 
     @DeleteMapping("/delete_catalogue/{id}")
+    @RequirePermission(action = "user_catalogue:delete")
     public ResponseEntity<?> deleteCatalogue(@PathVariable Long id) {
         try {
-            boolean deleted = userCatagoluesService.delete(id);
-
-            if (deleted) {
-                return ResponseEntity.ok(
-                    ApiResource.message("User catalogue deleted successfully", HttpStatus.OK)
-                );
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    ApiResource.error("NOT_FOUND", "Error", HttpStatus.NOT_FOUND)
-                );
-            }
-
+            // Xóa liên kết permission
+            String permUrl = permissionServiceUrl + "/api/v1/user_catalogue_permission/delete/by-catalogue/" + id;
+            restTemplate.delete(permUrl);
+            // Xóa liên kết user
+            String userUrl = userServiceUrl + "/api/v1/user_catalogue_user/delete/by-catalogue/" + id;
+            restTemplate.delete(userUrl);
+            // Xóa catalogue
+            userCatalogueRepository.deleteById(id);
+            return ResponseEntity.ok(
+                ApiResource.message("User catalogue deleted successfully", HttpStatus.OK)
+            );
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 ApiResource.error("NOT_FOUND", e.getMessage(), HttpStatus.NOT_FOUND)

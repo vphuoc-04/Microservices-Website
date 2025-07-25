@@ -1,4 +1,4 @@
-import { FaChartPie, FaUser } from "react-icons/fa";
+import { FaChartPie, FaUser, FaUserAlt } from "react-icons/fa";
 
 export const sidebarItem = [
     {
@@ -25,6 +25,14 @@ export const sidebarItem = [
                 links: [
                     { title: 'User management', to: '/admin/user/index' },
                     { title: 'User cataloge management', to: '/admin/user/catalogue' }
+                ]
+            },
+            {
+                icons: <FaUserAlt />,
+                label: 'Permission',
+                active: ['permission'],
+                links: [
+                    { title: 'Permission management', to: '/admin/permission/index' }
                 ]
             }
         ]

@@ -42,6 +42,7 @@
         <module>user-catalogue-service</module>
         <module>auth-service</module>
         <module>api-gateway</module>
+        <module>permission-service</module>
     </modules>
     
     <dependencyManagement>

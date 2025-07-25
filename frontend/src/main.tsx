@@ -14,19 +14,20 @@ import NoAuthMiddleware from './middlewares/NoAuthMiddleware.tsx'
 import AuthMiddleware from './middlewares/AuthMiddleware.tsx'
 
 // Components
-import LayoutDashboard from './components/dashboard/layout.tsx'
-import LayoutCustomer from './components/customer/layout.tsx'
+import LayoutDashboard from './components/admins/layout.tsx'
+import LayoutCustomer from './components/clients/layout.tsx'
 
 // Admin pages
-import LoginDashboard from './pages/dashboard/Login.tsx'
-import DashboardPanel from './pages/dashboard/Dashboard.tsx'
-import { View } from './pages//dashboard/users/user/View.tsx'
-import { Catalogue } from './pages/dashboard/users/catalogue/Catalogue.tsx'
+import LoginDashboard from './pages/admins/Login.tsx'
+import DashboardPanel from './pages/admins/Dashboard.tsx'
+import { View } from './pages//admins/users/user/View.tsx'
+import { Catalogue } from './pages/admins/users/catalogue/Catalogue.tsx'
+import PermissionView  from './pages/admins/permissions/View.tsx'
 
 // Customer pages
-import LoginCustomer from './pages/customer/Login.tsx'
-import RegisterCustomer from './pages/customer/Register.tsx'
-import Home from './pages/customer/Home.tsx'
+import LoginCustomer from './pages/clients/Login.tsx'
+import RegisterCustomer from './pages/clients/Register.tsx'
+import Home from './pages/clients/Home.tsx'
 
 const router = createBrowserRouter([
   {
@@ -49,7 +50,10 @@ const router = createBrowserRouter([
 
       // User
       { path: 'user/index', element: <View /> },
-      { path: 'user/catalogue', element: <Catalogue /> }
+      { path: 'user/catalogue', element: <Catalogue /> },
+
+      // Permission
+      { path: 'permission/index', element: <PermissionView /> }
     ]
   },
 

@@ -12,8 +12,8 @@ import lombok.RequiredArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserCatalogueResource {
     private final Long id;
-    private final Long createdBy;
-    private final Long updatedBy;
+    private final Long addedBy;
+    private final Long editedBy;
     private final String name;
     private final Integer publish; 
 }

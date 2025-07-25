@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.common_lib.annotations.RequirePermission;
 import com.example.common_lib.dtos.UserDto;
 import com.example.common_lib.resources.ApiResource;
 import com.example.user_service.entities.User;
@@ -38,9 +39,16 @@ public class UserController {
     }    
 
     @GetMapping("/me")
+    @RequirePermission(action = "user:get_data")
     public ResponseEntity<?> getUser() {
-        String id = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserDto userDto = userService.getUserById(Long.parseLong(id));
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long id;
+        try {
+            id = Long.parseLong(userId);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.status(401).body(ApiResource.message("Invalid user id in token", HttpStatus.UNAUTHORIZED));
+        }
+        UserDto userDto = userService.getUserById(id);
         if (userDto == null) {
             return ResponseEntity.notFound().build();
         }
@@ -99,6 +107,7 @@ public class UserController {
     }
 
     @GetMapping("/get_all_user")
+    @RequirePermission(action = "user:get_all_user")
     public ResponseEntity<?> getAllUsers(HttpServletRequest request) {
         Map<String, String[]> parameters = request.getParameterMap();
 
@@ -118,5 +127,12 @@ public class UserController {
         ApiResource<Page<UserResource>> response = ApiResource.ok(userResource, "User data fetched successfully");
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/batch")
+    public ResponseEntity<?> getBatch(@org.springframework.web.bind.annotation.RequestParam("ids") java.util.List<Long> ids) {
+        java.util.List<Long> validIds = userRepository.findAllById(ids)
+            .stream().map(User::getId).toList();
+        return ResponseEntity.ok(ApiResource.ok(validIds, "Fetched valid user ids successfully"));
     }
 }

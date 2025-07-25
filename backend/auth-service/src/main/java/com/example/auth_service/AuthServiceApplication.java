@@ -12,7 +12,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.example.common_lib.services",
         "com.example.common_lib.dtos",
         "com.example.common_lib.exceptions",
-        "com.example.common_lib.resources"
+        "com.example.common_lib.resources",
+        "com.example.common_lib.aspects"
     }
 )
 @EnableDiscoveryClient

@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserDto {
     private Long id;
-    private Long catalogueId;
     private String firstName;
     private String middleName;
     private String lastName;

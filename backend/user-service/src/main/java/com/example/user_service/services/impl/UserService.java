@@ -61,7 +61,7 @@ public class UserService extends BaseService implements UserServiceInterface, Us
     }
 
     @Override
-    public com.example.common_lib.dtos.UserDto getUserByEmail(String email) {
+    public UserDto getUserByEmail(String email) {
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
             return null;
@@ -79,10 +79,16 @@ public class UserService extends BaseService implements UserServiceInterface, Us
     }
 
     @Override
-    public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String username) throws org.springframework.security.core.userdetails.UsernameNotFoundException {
-        User user = userRepository.findByEmail(username).orElse(null);
+    public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String userIdStr) throws org.springframework.security.core.userdetails.UsernameNotFoundException {
+        Long userId;
+        try {
+            userId = Long.parseLong(userIdStr);
+        } catch (NumberFormatException e) {
+            throw new org.springframework.security.core.userdetails.UsernameNotFoundException("Invalid user id: " + userIdStr);
+        }
+        User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
-            throw new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found with email: " + username);
+            throw new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found with id: " + userId);
         }
         return new org.springframework.security.core.userdetails.User(
             user.getEmail(),
@@ -91,10 +97,9 @@ public class UserService extends BaseService implements UserServiceInterface, Us
         );
     }
 
-    private com.example.common_lib.dtos.UserDto convertToDto(User user) {
+    private UserDto convertToDto(User user) {
         com.example.common_lib.dtos.UserDto dto = new com.example.common_lib.dtos.UserDto();
         dto.setId(user.getId());
-        dto.setCatalogueId(user.getCatalogueId());
         dto.setFirstName(user.getFirstName());
         dto.setMiddleName(user.getMiddleName());
         dto.setLastName(user.getLastName());

@@ -25,20 +25,20 @@ public class JwtService {
         this.key = Keys.hmacShaKeyFor(Base64.getEncoder().encode(jwtConfig.getSecretKey().getBytes()));
     }
 
-    public String generateToken(Long userId,  String email, Long expirationTime){
-        Date now = new Date();
+    public String generateToken(Long userId, String email, Long expirationTime) {
         if (expirationTime == null) {
             expirationTime = jwtConfig.getExpirationTime();
         }
+        Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationTime);
         return Jwts.builder()
-            .setSubject(String.valueOf(userId))
-            .claim("email", email)
-            .setIssuer(jwtConfig.getIssuer())
-            .setIssuedAt(now)
-            .setExpiration(expiryDate)
-            .signWith(key, SignatureAlgorithm.HS512)
-            .compact();
+                .setSubject(String.valueOf(userId))
+                .claim("email", email)
+                .setIssuer(jwtConfig.getIssuer())
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
     }
 
     public String getUserIdFromJwt(String token){

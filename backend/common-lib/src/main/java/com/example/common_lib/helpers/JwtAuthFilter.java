@@ -41,7 +41,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             path.startsWith("/api/v1/auth/refresh_token") ||
             path.startsWith("/api/v1/auth/register") ||
             path.startsWith("/api/v1/users/validate") ||
-            path.startsWith("/api/v1/users/email/");
+            path.startsWith("/api/v1/users/email/") ||
+            (path.matches("/api/v1/users/\\d+$") && request.getMethod().equals("GET")) ||
+            path.startsWith("/api/v1/user_catalogue_permission/") ||
+            path.startsWith("/api/v1/user_catalogue_user/");
         System.out.println("[JwtAuthFilter] shouldNotFilter path: " + path + " => " + skip);
         return skip;
     }

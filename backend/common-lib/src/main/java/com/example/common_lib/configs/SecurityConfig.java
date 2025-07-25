@@ -43,6 +43,12 @@ public class SecurityConfig {
                 ).
                 permitAll()
 
+                .requestMatchers(
+                    "/api/v1/user_catalogue/get_all_catalogue",
+                    "/api/v1/users/get_all_user"
+                ).
+                permitAll()
+
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

@@ -1,5 +1,5 @@
 // Configs
-import axiosInstance from "../configs/axios";
+import { userServiceInstance } from '../configs/axios';
 
 // Helpers
 import { handleAxiosError } from "../helpers/axiosHelper";
@@ -15,7 +15,7 @@ const fetchUser = async(): Promise<User | null> => {
             return null;
         }
 
-        const response = await axiosInstance.get("/user", {
+        const response = await userServiceInstance.get("/users/me", {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -32,7 +32,6 @@ const fetchUser = async(): Promise<User | null> => {
     }
 }
 
-
 const getAllUser = async (page: number, perPage: number = 10, sort: string = "id,asc") => {
     try {
         const token = localStorage.getItem("token");
@@ -41,7 +40,7 @@ const getAllUser = async (page: number, perPage: number = 10, sort: string = "id
             return null;
         }
 
-        const response = await axiosInstance.get(`/get_all_user`, {
+        const response = await userServiceInstance.get(`/users/get_all_user`, {
             headers: { Authorization: `Bearer ${token}` },
             params: { page, perpage: perPage, sort },
         });
