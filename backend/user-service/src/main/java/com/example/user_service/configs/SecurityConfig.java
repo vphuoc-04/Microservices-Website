@@ -60,6 +60,9 @@ public class SecurityConfig {
                     "/api/v1/users/email/{email}",
                     "/api/v1/users/get_all_user",
                     "/api/v1/users/**",
+                    "/api/v1/users/delete_many",
+                    "/api/v1/users/{id}/publish",
+                    "/api/v1/users/update_field",
                     "/api/v1/user_catalogue_user/**"
                 ).permitAll()
                 .requestMatchers("/api/v1/users/me").authenticated()

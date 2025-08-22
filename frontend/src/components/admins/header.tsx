@@ -6,7 +6,7 @@ import { User } from "../../types/User";
 
 // Services
 import { logout } from "../../services/AuthService";
-import { fetchUser } from "../../services/UserService";
+import { me } from "../../services/UserService";
 
 // Redux
 import { useDispatch } from "react-redux";
@@ -29,7 +29,7 @@ const Header = () => {
 
     useEffect(() => {
         const fetchUserData = async () => {
-            const userData = await fetchUser();
+            const userData = await me();
             setUser(userData);
         };
         fetchUserData();

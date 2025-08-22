@@ -7,6 +7,11 @@ import { Provider } from 'react-redux'
 
 import { ToastContainer } from 'react-toastify'
 
+import {
+  QueryClient,
+  QueryClientProvider
+} from 'react-query'
+
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 // Middlewares
@@ -20,9 +25,9 @@ import LayoutCustomer from './components/clients/layout.tsx'
 // Admin pages
 import LoginDashboard from './pages/admins/Login.tsx'
 import DashboardPanel from './pages/admins/Dashboard.tsx'
-import { View } from './pages//admins/users/user/View.tsx'
+import { User } from './pages/admins/users/user/User.tsx'
 import { Catalogue } from './pages/admins/users/catalogue/Catalogue.tsx'
-import PermissionView  from './pages/admins/permissions/View.tsx'
+import { Permission }  from './pages/admins/permissions/Permisson.tsx'
 
 // Customer pages
 import LoginCustomer from './pages/clients/Login.tsx'
@@ -49,11 +54,11 @@ const router = createBrowserRouter([
       { path: 'dashboard', element: <DashboardPanel /> },
 
       // User
-      { path: 'user/index', element: <View /> },
+      { path: 'user/users', element: <User /> },
       { path: 'user/catalogue', element: <Catalogue /> },
 
       // Permission
-      { path: 'permission/index', element: <PermissionView /> }
+      { path: 'permission/permissions', element: <Permission /> }
     ]
   },
 
@@ -86,9 +91,13 @@ const router = createBrowserRouter([
   }
 ]);
 
+const queryClient = new QueryClient()
+
 createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
-      <RouterProvider router={router} />
-      <ToastContainer position='top-center' />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <ToastContainer position='top-center' />
+      </QueryClientProvider>
   </Provider>
 )

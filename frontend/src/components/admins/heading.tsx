@@ -1,43 +1,41 @@
 import React from "react"
-
 import { Link } from "react-router-dom"
-
 import {
   Breadcrumb,
-  BreadcrumbItem,
+  BreadcrumbItem as UIBreadcrumbItem,
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
+type Crumb = { title: string; route: string }
+
 interface PageHeadingProps {
-    breadcrumb: {
-        title: string,
-        route: string
-    }
+  breadcrumb: Crumb | Crumb[]   
 }
 
 const PageHeading: React.FC<PageHeadingProps> = ({ breadcrumb }) => {
+    const crumbs: Crumb[] = Array.isArray(breadcrumb) ? breadcrumb : [breadcrumb]
+    const last = crumbs[crumbs.length - 1]
+
     return (
-        <>
-            <div className="page-heading py-[20px] bg-white mb-3 shadow-sm">
-                <div className="px-[15px]">
-                    <h2 className="text-[24px] mb-[5px]">{breadcrumb.title}</h2>
-                    <Breadcrumb>
-                        <BreadcrumbList>
-                            <BreadcrumbItem>
-                                <Link to = "/admin/dashboard" >Dashboard</Link>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                                <Link to = {breadcrumb.route}>{breadcrumb.title}</Link>
-                            </BreadcrumbItem>
-                        </BreadcrumbList>
-                    </Breadcrumb>
-                </div>
+        <div className="page-heading py-[20px] bg-white mb-3 shadow-sm">
+            <div className="px-[15px]">
+                <h2 className="text-[24px] mb-[5px]">{last?.title ?? ""}</h2>
+                <Breadcrumb>
+                    <BreadcrumbList>
+                        {crumbs.map((item, index) => (
+                            <React.Fragment key={`${item.route}-${index}`}>
+                                {index > 0 && <BreadcrumbSeparator />}
+                                <UIBreadcrumbItem>
+                                <Link to={item.route}>{item.title}</Link>
+                                </UIBreadcrumbItem>
+                            </React.Fragment>
+                        ))}
+                    </BreadcrumbList>
+                </Breadcrumb>
             </div>
-        </>
+        </div>
     )
 }
 
 export default PageHeading
-

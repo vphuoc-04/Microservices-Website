@@ -21,9 +21,6 @@ const fetchUserCatalogue = async(): Promise<UserCatalogue[]> => {
                 Authorization: `Bearer ${token}`,
             },
         });
-
-        console.log("User cataloge: ", resposne.data.data)
-
         return resposne.data.data.content
 
     } catch (error) {
@@ -53,8 +50,6 @@ const createUserCatalogue = async(name: string, publish: string, users: number[]
                 },
             }
         );
-
-        console.log("New User Catalogue Created: ", response.data);
         return true;
 
     } catch (error) {
@@ -83,8 +78,6 @@ const updateUserCatalogue = async(id: number, name: string, publish: string): Pr
                 },
             }
         );
-
-        console.log("User Catalogue Updated: ", response.data);
         return true;
 
     } catch (error) {
@@ -106,8 +99,6 @@ const deleteUserCatalogue = async (id: number): Promise<boolean> => {
                 Authorization: `Bearer ${token}`,
             },
         });
-
-        console.log("User Catalogue Deleted: ", response.data);
         return true;
     } catch (error) {
         handleAxiosError(error);
@@ -115,10 +106,21 @@ const deleteUserCatalogue = async (id: number): Promise<boolean> => {
     }
 };
 
+const breadcrumb = [
+  {
+    title: "User",
+    route: ""
+  },
+  {
+    title: "Quản lý nhóm người dùng",
+    route: "/admin/user/catalogue"
+  }
+]
 
 export { 
     fetchUserCatalogue,
     createUserCatalogue,
     updateUserCatalogue,
-    deleteUserCatalogue
+    deleteUserCatalogue,
+    breadcrumb
 }

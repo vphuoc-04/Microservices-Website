@@ -1,5 +1,6 @@
 package com.example.user_service.services.impl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -16,7 +17,10 @@ import com.example.common_lib.dtos.UserDto;
 import com.example.common_lib.services.BaseService;
 import com.example.user_service.entities.User;
 import com.example.user_service.repositories.UserRepository;
+import com.example.user_service.requests.UpdateRequest;
 import com.example.user_service.services.interfaces.UserServiceInterface;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService extends BaseService implements UserServiceInterface, UserDetailsService {
@@ -109,5 +113,50 @@ public class UserService extends BaseService implements UserServiceInterface, Us
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteMany(List<Long> ids) {
+        try {
+            userRepository.deleteAllById(ids);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateStatusByField(Long id, UpdateRequest request) {
+        Optional<User> userId = userRepository.findById(id);
+        if (userId.isEmpty()) {
+            throw new IllegalArgumentException("Không tìm thấy người dùng với ID: " + id);
+        }
+        User user = userId.get();
+        if (request.getPublish() != 1 && request.getPublish() != 2) {
+            throw new IllegalArgumentException("Trạng thái xuất bản không hợp lệ. Phải là 1 (chưa xuất bản) hoặc 2 (đã xuất bản).");
+        }
+        user.setPublish(request.getPublish());
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void updateFieldByParams(List<Long> ids, Integer publishValue) {
+        if (ids == null || ids.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách ID không được rỗng");
+        }
+        if (publishValue != 1 && publishValue != 2) {
+            throw new IllegalArgumentException("Trạng thái xuất bản không hợp lệ. Phải là 1 (chưa xuất bản) hoặc 2 (đã xuất bản).");
+        }
+        List<User> users = userRepository.findAllById(ids);
+        if (users.isEmpty()) {
+            throw new IllegalArgumentException("Không tìm thấy người dùng nào với danh sách ID cung cấp");
+        }
+        users.forEach(user -> {
+            user.setPublish(publishValue);
+            userRepository.save(user);
+        });
     }
 }

@@ -31,23 +31,30 @@ import { Button } from "@/components/ui/button";
 import { UserCatalogue } from "@/types/UserCatalogue";
 
 import { 
+    breadcrumb,
     fetchUserCatalogue, 
     createUserCatalogue, 
     updateUserCatalogue, 
     deleteUserCatalogue 
 } from "@/services/UserCatalogueService";
-import { getAllUser } from "@/services/UserService";
-import { getAllPermissions, Permission } from "@/services/PermissionService";
+import { pagination } from "@/services/UserService";
+import { getAllPermissions, PermissionService } from "@/services/PermissionService";
 import PageHeading from "@/components/admins/heading";
 
+// Types
+import { Breadcrumb } from "@/types/Breadcrumb";
+
+
 const Catalogue = () => {
+    const breadcrumbData: Breadcrumb[] = Array.isArray(breadcrumb) ? breadcrumb : [breadcrumb]
+
     const [userCatalogue, setUserCatalogue] = useState<UserCatalogue[]>([]);
     const [name, setName] = useState("");
     const [publish, setPublish] = useState("1");
     const [editingId, setEditingId] = useState<number | null>(null);
     const [allUsers, setAllUsers] = useState<any[]>([]);
     const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-    const [allPermissions, setAllPermissions] = useState<Permission[]>([]);
+    const [allPermissions, setAllPermissions] = useState<PermissionService[]>([]);
     const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
 
     useEffect(() => {
@@ -55,7 +62,7 @@ const Catalogue = () => {
             const data = await fetchUserCatalogue();
             setUserCatalogue(data);
 
-            const userData = await getAllUser(1, 100);
+            const userData = await pagination(1);
             setAllUsers(userData?.users || []);
 
             const permissionData = await getAllPermissions();
@@ -93,14 +100,9 @@ const Catalogue = () => {
         }
     };
 
-    const breadcrumb = {
-        title: "Quản lý nhóm người dùng",
-        route: "/admin/user/catalogue"
-    }
-
     return (
         <>
-            <PageHeading breadcrumb=  { breadcrumb } />
+            <PageHeading breadcrumb=  { breadcrumbData } />
             <div className="container p-3">
                 <Card>
                     <CardHeader>

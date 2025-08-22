@@ -8,8 +8,8 @@ import lombok.Data;
 
 @Data
 public class UpdateRequest {
-    @NotBlank(message = "Member group name cannot be empty")
-    private String name;
+    // @NotBlank(message = "Member group name cannot be empty")
+    // private String name;
 
     @NotNull(message = "Status cannot be empty")
     @Min(value = 0, message = "Status value must be greater than or equal to 0")

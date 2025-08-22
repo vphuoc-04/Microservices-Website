@@ -28,9 +28,6 @@ const customerRegister = async (payload: RegisterPayload): Promise<boolean> => {
             phone: payload.phone,
             password: payload.password
         })
-
-        console.log(response.data)
-
         return response.data;
 
     } catch (error) {
@@ -51,8 +48,6 @@ const login = async (payload:LoginPayload): Promise<boolean> => {
             localStorage.setItem('token', response.data.data.token);
             localStorage.setItem('refresh_token', response.data.data.refreshToken);
         }
-
-        console.log(response);
 
         return true;
 

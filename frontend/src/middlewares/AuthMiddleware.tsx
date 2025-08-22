@@ -7,7 +7,7 @@ import { RootState } from "../redux/store";
 import { setAuthLogin, setAuthLogout } from "../redux/slice/authSlice";
 
 // Services
-import { fetchUser } from "../services/UserService";
+import { me } from "../services/UserService";
 
 type ProtectedRouteProps = PropsWithChildren;
 
@@ -20,14 +20,10 @@ const AuthMiddleware = ({ children }: ProtectedRouteProps) => {
     useEffect(() => {
         const checkAuthenticate = async () => {
             if (!isAuthenticated || !user) {
-                const userData = await fetchUser();
-    
-                console.log("✅ Fetched user data:", userData);
-
+                const userData = await me();
                 if (userData) {
                     dispatch(setAuthLogin(userData));
                 } else {
-                    console.warn("⚠ No user data found, logging out.");
                     dispatch(setAuthLogout());
                     navigate("/admin/login");
                 }

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { RootState } from "../redux/store";
 
 // Services
-import { fetchUser } from "../services/UserService";
+import { me } from "../services/UserService";
 
 type ProtectedRouteProps = PropsWithChildren;
 
@@ -18,7 +18,7 @@ const NoAuthMiddleware = ({ children }: ProtectedRouteProps) => {
     useEffect(() => {
         const checkAuthenticate = async () => {
             try {
-                const userData = await fetchUser()
+                const userData = await me()
                 if (userData !== null) {
                     navigate('/admin/dashboard')
                 } else {

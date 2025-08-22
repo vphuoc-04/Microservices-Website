@@ -19,10 +19,16 @@ const Dashboard = () => {
         dispatch(clearToast())
     }, [message, type, dispatch])
 
-    const breadcrumb = {
-        title: "Thống kê chung",
-        route: '/admin/dashboard'
-    }
+    const breadcrumb = [
+        {
+            title: "Dashboard",
+            route: ""
+        },
+        {
+            title: "Thống kê chung",
+            route: '/admin/dashboard'
+        }
+    ]
 
     return (
         <div>

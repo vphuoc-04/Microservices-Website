@@ -3,14 +3,14 @@ import { permissionServiceInstance } from '../configs/axios';
 // Helpers
 import { handleAxiosError } from "../helpers/axiosHelper";
 
-export interface Permission {
+export interface PermissionService {
     id: number;
     name: string;
     description?: string;
     publish: number;
 }
 
-const getAllPermissions = async (): Promise<Permission[]> => {
+const getAllPermissions = async (): Promise<PermissionService[]> => {
     try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -79,7 +79,7 @@ export const deletePermission = async (id: number): Promise<boolean> => {
     }
 };
 
-export const getPermissionById = async (id: number): Promise<Permission | null> => {
+export const getPermissionById = async (id: number): Promise<PermissionService | null> => {
     try {
         const token = localStorage.getItem("token");
         if (!token) return null;
@@ -94,6 +94,19 @@ export const getPermissionById = async (id: number): Promise<Permission | null> 
     }
 };
 
+const breadcrumb = [
+  {
+    title: "Permission",
+    route: ""
+  },
+  {
+    title: "Quản lý quyền hạn",
+    route: "/admin/permission/permissions"
+  }
+]
+
+
 export {
+    breadcrumb,
     getAllPermissions
 };
