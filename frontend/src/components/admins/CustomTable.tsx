@@ -95,7 +95,7 @@ const CustomTable = ({
                         {tableColumn && tableColumn.map((column, idx) => (
                             <TableCell key={idx}>{column.render(row)}</TableCell>
                         ))}
-                        <TableCell className="text-center">
+                        <TableCell className="">
                             <Switch 
                                 value={row.id} 
                                 checked={columnState[row.id]?.publish ?? false} 

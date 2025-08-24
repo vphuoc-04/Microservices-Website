@@ -5,3 +5,14 @@ export const perpages = [
     '40',
     '50'
 ]
+
+export const publishs = [
+    {
+        id: 1,
+        name: 'Xuất bản'
+    },
+    {
+        id: 2,
+        name: 'Không xuất bản'
+    }   
+]
