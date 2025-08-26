@@ -1,8 +1,3 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery } from "react-query";
-
-// Services
 import { breadcrumb, model, pagination, tableColumn } from "@/services/UserService";
 
 // Components
@@ -17,26 +12,13 @@ import { Breadcrumb } from "@/types/Breadcrumb";
 
 // Hooks
 import useCheckBoxState from "@/hooks/useCheckBoxState";
+import useTable from "@/hooks/useTable";
 
-const User: React.FC = () => {
+const User = ({}) => {
     const breadcrumbData: Breadcrumb[] = Array.isArray(breadcrumb) ? breadcrumb : [breadcrumb]
-    const navigate = useNavigate();
-    const [searchParams, setSearchParams] = useSearchParams();
-    const currentPage = searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1
-    const [page, setPage] = useState<number | null>(currentPage)
-    const { isLoading, data, isError, refetch } = useQuery(['users', page], () => pagination(page))
+    const { isLoading, data, isError, refetch, handlePageChange, handleQueryString } = useTable({model, pagination})
     const { checkedState, checkedAllState, handleCheckedChange, handleCheckedAllChange, isAnyChecked } = useCheckBoxState(data, model, isLoading);
     const anyChecked = isAnyChecked();
-
-    const handlePageChange = (page: number) => {
-        setPage(page);
-        navigate(`?page=${page}`);
-    }
-
-    useEffect(() => {
-        setSearchParams({ page: page?.toString() || "1" })
-        refetch()
-    }, [page, refetch, setSearchParams])
 
     const buildLinks = (pageData: any) => {
         if (!pageData) return [];
@@ -54,7 +36,13 @@ const User: React.FC = () => {
             <div className="container p-3">
                 <Card>
                     <CardContent>
-                        <Filter isAnyChecked={anyChecked} checkedState={checkedState} model={model} refetch={refetch} />
+                        <Filter 
+                            isAnyChecked={anyChecked} 
+                            checkedState={checkedState} 
+                            model={model} 
+                            refetch={refetch} 
+                            handleQueryString={(filters: any) => handleQueryString(filters)}
+                        />
 
                         <CustomTable 
                             isLoading = {isLoading}

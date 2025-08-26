@@ -1,5 +1,6 @@
 package com.example.user_service.services.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,10 +18,13 @@ import org.springframework.stereotype.Service;
 import com.example.common_lib.dtos.UserDto;
 import com.example.common_lib.services.BaseService;
 import com.example.user_service.entities.User;
+import com.example.user_service.helpers.FilterParameter;
 import com.example.user_service.repositories.UserRepository;
 import com.example.user_service.requests.UpdateRequest;
 import com.example.user_service.services.interfaces.UserServiceInterface;
+import com.example.user_service.specifications.BaseSpecification;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -30,16 +35,63 @@ public class UserService extends BaseService implements UserServiceInterface, Us
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Override
-    public Page<User> paginate(Map<String, String[]> parameters) {
-        int page = parameters.containsKey("page") ? Integer.parseInt(parameters.get("page")[0]) : 1;
-        int perpage = parameters.containsKey("perpage") ? Integer.parseInt(parameters.get("perpage")[0]) : 10;
+    private  String[] searchFields() {
+        return new String[]{"firstName", "middleName", "lastName", "email", "phone"};
+    }
+
+    // @Override
+    // public Page<User> paginate(Map<String, String[]> parameters) {
+    //     int page = parameters.containsKey("page") ? Integer.parseInt(parameters.get("page")[0]) : 1;
+    //     int perpage = parameters.containsKey("perpage") ? Integer.parseInt(parameters.get("perpage")[0]) : 10;
+    //     String sortParam = parameters.containsKey("sort") ? parameters.get("sort")[0] : null;
+    //     Sort sort = createSort(sortParam);
+
+    //     Pageable pageable = PageRequest.of(page - 1, perpage, sort);
+
+    //     return userRepository.findAll(pageable);
+    // }
+    
+    protected Sort parseSort(Map<String, String[]> parameters) {
         String sortParam = parameters.containsKey("sort") ? parameters.get("sort")[0] : null;
-        Sort sort = createSort(sortParam);
+        return createSort(sortParam);
+    } 
+
+    private Map<String, String[]> modifiedParameters(HttpServletRequest request, Map<String, String[]> parameters){
+
+        Map<String, String[]> modifedParameters = new HashMap<>(parameters);
+
+        Object userIdAttribute = request.getAttribute("userId");
+        if(userIdAttribute != null){
+            String userId = userIdAttribute.toString();
+            modifedParameters.put("userId", new String[]{userId});
+        }
+
+        return modifedParameters;
+    }
+
+    @Override
+    public Page<User> paginate(Map<String, String[]> parameters, HttpServletRequest request) {
+        Map<String, String[]> modifiedParameters = modifiedParameters(request, parameters);
+        int page = modifiedParameters.containsKey("page") ? Integer.parseInt(modifiedParameters.get("page")[0]) : 1;
+        int perpage = modifiedParameters.containsKey("perpage") ? Integer.parseInt(modifiedParameters.get("perpage")[0]) : 10;
+        Sort sort  = parseSort(modifiedParameters);
+        Specification<User> specs = buildSpecification(modifiedParameters, searchFields());
 
         Pageable pageable = PageRequest.of(page - 1, perpage, sort);
+        return userRepository.findAll(specs, pageable);
+    }
 
-        return userRepository.findAll(pageable);
+    protected Specification<User> buildSpecification(Map<String, String[]> parameters, String[] searchFields) {
+        String keyword = FilterParameter.filterKeyword(parameters);
+        Map<String, String> filterSimple = FilterParameter.filterSimple(parameters);
+
+        Specification<User> specs = Specification.where(
+            BaseSpecification.<User>keywordSpec(keyword, searchFields) 
+        )
+        .or(BaseSpecification.<User>keywordSpecLoose(keyword, searchFields)) 
+        .and(BaseSpecification.<User>whereSpec(filterSimple));
+
+        return specs;
     }
 
     @Override
@@ -159,4 +211,5 @@ public class UserService extends BaseService implements UserServiceInterface, Us
             userRepository.save(user);
         });
     }
+
 }

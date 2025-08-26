@@ -9,10 +9,10 @@ export const perpages = [
 export const publishs = [
     {
         id: 1,
-        name: 'Xuất bản'
-    },
+        name: 'Không xuất bản'
+    }, 
     {
         id: 2,
-        name: 'Không xuất bản'
-    }   
+        name: 'Xuất bản'
+    }, 
 ]

@@ -116,7 +116,7 @@ public class UserController {
     public ResponseEntity<?> getAllUsers(HttpServletRequest request) {
         Map<String, String[]> parameters = request.getParameterMap();
 
-        Page<User> users = userService.paginate(parameters);
+        Page<User> users = userService.paginate(parameters, request);
 
         Page<UserResource> userResource = users.map(user -> 
             UserResource.builder()

@@ -15,10 +15,24 @@ import { Input } from "../ui/input"
 import { useEffect, useState } from "react"
 import useFilterAction from "@/hooks/useFilterAction"
 import CustomAlertDialog from "./CustomAlertDialog"
+import useDebounce from "@/hooks/useDebounce"
 
-const Filter = ({ isAnyChecked, checkedState, model, refetch }: FilterProps) => {
+interface FilterInterface {
+    perpage: string | number,
+    publish: string | number,
+    parent_id: string | number
+}
+
+const Filter = ({ isAnyChecked, checkedState, model, refetch, handleQueryString }: FilterProps) => {
     const [alertDialogOpen, setAlertDialogOpen] = useState<boolean>(false)
     const [actionSelectedValue, setActionSelectedValue] = useState<string>('')
+    const [filters, setFilters] = useState<FilterInterface>({
+        perpage: '',
+        publish: 0,
+        parent_id: 0
+    })
+    const [keyword, setKeyword] = useState<string>('')
+
     const { actionSwitch } = useFilterAction();
 
     const openAlertDialog = (value: string) => {
@@ -37,9 +51,28 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch }: FilterProps) => 
         closeAlertDialog()
     }
 
+    const { debounce } = useDebounce()
+
+    const debounceInput = debounce((value: string) => {
+        setKeyword(value)
+    }, 300)
+
+    useEffect(() => {
+        handleQueryString({...filters, keyword: keyword})
+    }, [keyword])
+
+
+    const handleFilter = (value: string, field: string) => {
+        setFilters(prevFilters => ({...prevFilters, [field]: value}))
+    }
+
     useEffect(() => {
         console.log(checkedState)
     }, [checkedState])
+
+    useEffect(() => {
+        handleQueryString({...filters})
+    }, [filters])
 
     return (
         <>
@@ -84,7 +117,7 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch }: FilterProps) => 
                         </div>
 
                         <div className="mr-[15px]">
-                            <Select>
+                            <Select onValueChange={(value) => handleFilter(value, 'perpage')}>
                                 <SelectTrigger className="w-[180px]">
                                     <SelectValue placeholder="Chọn số bản ghi" />
                                 </SelectTrigger>
@@ -97,7 +130,7 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch }: FilterProps) => 
                         </div>
 
                         <div className="mr-[15px]">
-                            <Select>
+                            <Select onValueChange={(value) => handleFilter(value, 'publish')}>
                                 <SelectTrigger className="w-[180px]">
                                     <SelectValue placeholder="Chọn trạng thái" />
                                 </SelectTrigger>
@@ -110,7 +143,7 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch }: FilterProps) => 
                         </div>
 
                         <div className="mr-[15px]">
-                            <Select>
+                            <Select onValueChange={(value) => handleFilter(value, 'parent_id')}>
                                 <SelectTrigger className="w-[180px]">
                                     <SelectValue placeholder="Chọn danh mục" />
                                 </SelectTrigger>
@@ -120,7 +153,10 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch }: FilterProps) => 
                         </div>
 
                         <div className="mr-[10px] flex gap-3">
-                            <Input placeholder="Nhập nội dung..."></Input>
+                            <Input 
+                                placeholder="Tìm kiếm..."
+                                onChange={(e) => debounceInput(e.target.value, 'keyword')}         
+                            />
                         </div>
                     </div>
                     <div>

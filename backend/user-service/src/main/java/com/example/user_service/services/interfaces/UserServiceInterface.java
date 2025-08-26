@@ -10,8 +10,10 @@ import com.example.common_lib.dtos.UserDto;
 import com.example.user_service.entities.User;
 import com.example.user_service.requests.UpdateRequest;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public interface UserServiceInterface {
-    Page<User> paginate(Map<String, String[]> parameters);
+    Page<User> paginate(Map<String, String[]> parameters, HttpServletRequest request);
     UserDto getUserById(Long id);
     UserDto getUserById(Long id, String accessToken);
     UserDto getUserByEmail(String email);

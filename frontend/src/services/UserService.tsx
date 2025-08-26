@@ -32,7 +32,7 @@ const me = async(): Promise<User | null> => {
     }
 }
 
-const pagination = async (page: number | null) => {
+const pagination = async (queryString: string) => {
     try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -40,7 +40,7 @@ const pagination = async (page: number | null) => {
             return null;
         }
 
-        const response = await userServiceInstance.get(`/users/get_all_user?page=${page}`, {
+        const response = await userServiceInstance.get(`/users/get_all_user?${queryString}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
 
