@@ -1,7 +1,9 @@
 package com.example.user_service.controllers;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,14 +16,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.common_lib.annotations.RequirePermission;
 import com.example.common_lib.dtos.UserDto;
 import com.example.common_lib.resources.ApiResource;
+import com.example.common_lib.services.JwtService;
 import com.example.user_service.entities.User;
+import com.example.user_service.entities.UserCatalogueUser;
 import com.example.user_service.repositories.UserRepository;
+import com.example.user_service.requests.StoreRequest;
+import com.example.user_service.requests.UpdatePublishRequest;
 import com.example.user_service.requests.UpdateRequest;
 import com.example.user_service.resources.UserResource;
 import com.example.user_service.services.interfaces.UserServiceInterface;
@@ -36,6 +43,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JwtService jwtService;
 
     public UserController (
         UserServiceInterface userService
@@ -127,6 +137,15 @@ public class UserController {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .phone(user.getPhone())
+                .birthDate(
+                    user.getBirthDate() != null 
+                        ? user.getBirthDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) 
+                        : null
+                )
+                .gender(user.getGender())
+                .userCatalogueIds( 
+                    user.getUserCatalogueUsers() != null ? 
+                    user.getUserCatalogueUsers() .stream() .map(UserCatalogueUser::getUserCatalogueId) .collect(Collectors.toList()) : null )
                 .build()
         );
 
@@ -159,7 +178,7 @@ public class UserController {
 
     @PutMapping("/{id}/publish")
     @RequirePermission(action = "users:update_publish")
-    public ResponseEntity<?> updateStatusByField(@PathVariable Long id, @Valid @RequestBody UpdateRequest request) {
+    public ResponseEntity<?> updateStatusByField(@PathVariable Long id, @Valid @RequestBody UpdatePublishRequest request) {
         try {
             userService.updateStatusByField(id, request);
             return ResponseEntity.ok(ApiResource.ok(null, "Cập nhật trạng thái xuất bản thành công"));
@@ -184,6 +203,175 @@ public class UserController {
             return ResponseEntity.badRequest().body(ApiResource.message("Giá trị publish phải là số nguyên (1 hoặc 2)", HttpStatus.BAD_REQUEST));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResource.message(e.getMessage(), HttpStatus.BAD_REQUEST));
+        }
+    }
+
+    @PostMapping("/create")
+    @RequirePermission(action = "users:create")
+    public ResponseEntity<?> create(@Valid @RequestBody StoreRequest request, @RequestHeader("Authorization") String bearerToken) {
+        try {
+            String token = bearerToken.substring(7);
+            String userId = jwtService.getUserIdFromJwt(token);
+            Long addedBy = Long.valueOf(userId);
+
+            User user = userService.create(request, addedBy);
+
+            UserResource userResource = UserResource.builder()
+                .id(user.getId())
+                .publish(user.getPublish())
+                .firstName(user.getFirstName())
+                .middleName(user.getMiddleName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .birthDate(
+                    user.getBirthDate() != null 
+                        ? user.getBirthDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) 
+                        : null
+                )
+                .gender(user.getGender())
+                .userCatalogueIds(
+                    user.getUserCatalogueUsers() != null ?
+                        user.getUserCatalogueUsers()
+                            .stream()
+                            .map(UserCatalogueUser::getUserCatalogueId)
+                            .toList()
+                        : null
+                )
+                .build();
+
+            ApiResource<UserResource> response =
+                    ApiResource.ok(userResource, "Thêm người dùng mới thành công");
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ApiResource.message(e.getMessage(), HttpStatus.BAD_REQUEST));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResource.message("Thêm thất bại: " + e.getMessage(),
+                            HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+    
+    @PutMapping("/update/{id}")
+    @RequirePermission(action = "users:update")
+    public ResponseEntity<?> update(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateRequest request,
+            @RequestHeader("Authorization") String bearerToken) {
+        try {
+            String token = bearerToken.substring(7);
+            String userId = jwtService.getUserIdFromJwt(token);
+            Long updatedBy = Long.valueOf(userId);
+
+            User user = userService.update(id, request, updatedBy);
+
+            UserResource userResource = UserResource.builder()
+                    .id(user.getId())
+                    .img(user.getImg())
+                    .publish(user.getPublish())
+                    .firstName(user.getFirstName())
+                    .middleName(user.getMiddleName())
+                    .lastName(user.getLastName())
+                    .email(user.getEmail())
+                    .phone(user.getPhone())
+                    .birthDate(
+                            user.getBirthDate() != null
+                                    ? user.getBirthDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                                    : null
+                    )
+                    .gender(user.getGender())
+                    .userCatalogueIds(
+                            user.getUserCatalogueUsers() != null ?
+                                    user.getUserCatalogueUsers().stream()
+                                            .map(UserCatalogueUser::getUserCatalogueId)
+                                            .toList()
+                                    : null
+                    )
+                    .build();
+
+            ApiResource<UserResource> response = ApiResource.ok(userResource, "Cập nhật người dùng thành công");
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ApiResource.message(e.getMessage(), HttpStatus.BAD_REQUEST));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                ApiResource.message("Cập nhật thất bại: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR)
+            );
+        }
+    }
+
+    @GetMapping("/view/{id}")
+    @RequirePermission(action = "users:view")
+    public ResponseEntity<?> view(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String bearerToken) {
+        try {
+            String token = bearerToken.substring(7);
+            String userId = jwtService.getUserIdFromJwt(token);
+
+            User user = userService.view(id);
+
+            UserResource userResource = UserResource.builder()
+                    .id(user.getId())
+                    .img(user.getImg())
+                    .publish(user.getPublish())
+                    .firstName(user.getFirstName())
+                    .middleName(user.getMiddleName())
+                    .lastName(user.getLastName())
+                    .email(user.getEmail())
+                    .phone(user.getPhone())
+                    .birthDate(
+                            user.getBirthDate() != null
+                                    ? user.getBirthDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                                    : null
+                    )
+                    .gender(user.getGender())
+                    .userCatalogueIds(
+                            user.getUserCatalogueUsers() != null ?
+                                    user.getUserCatalogueUsers().stream()
+                                            .map(UserCatalogueUser::getUserCatalogueId)
+                                            .toList()
+                                    : null
+                    )
+                    .build();
+
+            ApiResource<UserResource> response = ApiResource.ok(userResource, "Xem chi tiết người dùng thành công");
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResource.message(e.getMessage(), HttpStatus.BAD_REQUEST));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResource.message("Xem thất bại: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @RequirePermission(action = "users:delete")
+    public ResponseEntity<?> delete(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String bearerToken) {
+        try {
+            String token = bearerToken.substring(7);
+            String userId = jwtService.getUserIdFromJwt(token);
+            Long deletedBy = Long.valueOf(userId);
+
+            userService.delete(id, deletedBy);
+
+            ApiResource<String> response = ApiResource.ok("Xóa người dùng thành công", "Người dùng đã được xóa");
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResource.message(e.getMessage(), HttpStatus.BAD_REQUEST));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResource.message("Xóa thất bại: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
 }

@@ -18,12 +18,18 @@ import org.springframework.stereotype.Service;
 import com.example.common_lib.dtos.UserDto;
 import com.example.common_lib.services.BaseService;
 import com.example.user_service.entities.User;
+import com.example.user_service.entities.UserCatalogueUser;
 import com.example.user_service.helpers.FilterParameter;
+import com.example.user_service.repositories.UserCatalogueUserRepository;
 import com.example.user_service.repositories.UserRepository;
+import com.example.user_service.requests.StoreRequest;
+import com.example.user_service.requests.UpdatePublishRequest;
 import com.example.user_service.requests.UpdateRequest;
 import com.example.user_service.services.interfaces.UserServiceInterface;
 import com.example.user_service.specifications.BaseSpecification;
 
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
@@ -33,24 +39,15 @@ public class UserService extends BaseService implements UserServiceInterface, Us
     private UserRepository userRepository;
 
     @Autowired
+    private UserCatalogueUserRepository userCatalogueUserRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private  String[] searchFields() {
         return new String[]{"firstName", "middleName", "lastName", "email", "phone"};
     }
 
-    // @Override
-    // public Page<User> paginate(Map<String, String[]> parameters) {
-    //     int page = parameters.containsKey("page") ? Integer.parseInt(parameters.get("page")[0]) : 1;
-    //     int perpage = parameters.containsKey("perpage") ? Integer.parseInt(parameters.get("perpage")[0]) : 10;
-    //     String sortParam = parameters.containsKey("sort") ? parameters.get("sort")[0] : null;
-    //     Sort sort = createSort(sortParam);
-
-    //     Pageable pageable = PageRequest.of(page - 1, perpage, sort);
-
-    //     return userRepository.findAll(pageable);
-    // }
-    
     protected Sort parseSort(Map<String, String[]> parameters) {
         String sortParam = parameters.containsKey("sort") ? parameters.get("sort")[0] : null;
         return createSort(sortParam);
@@ -83,13 +80,41 @@ public class UserService extends BaseService implements UserServiceInterface, Us
 
     protected Specification<User> buildSpecification(Map<String, String[]> parameters, String[] searchFields) {
         String keyword = FilterParameter.filterKeyword(parameters);
-        Map<String, String> filterSimple = FilterParameter.filterSimple(parameters);
 
-        Specification<User> specs = Specification.where(
-            BaseSpecification.<User>keywordSpec(keyword, searchFields) 
-        )
-        .or(BaseSpecification.<User>keywordSpecLoose(keyword, searchFields)) 
-        .and(BaseSpecification.<User>whereSpec(filterSimple));
+        // Lấy filter đơn giản và clone ra để chỉnh
+        Map<String, String> filterSimpleRaw = FilterParameter.filterSimple(parameters);
+        Map<String, String> filterSimple = new HashMap<>(filterSimpleRaw);
+
+        // Bắt và loại bỏ key không thuộc entity User
+        String ucKey = null;
+        if (filterSimple.containsKey("userCatalogueId")) {
+            ucKey = "userCatalogueId";
+        } else if (filterSimple.containsKey("user_catalogue_id")) {
+            ucKey = "user_catalogue_id";
+        }
+
+        Long parsedCatalogueId = null;
+        if (ucKey != null) {
+            try {
+                parsedCatalogueId = Long.valueOf(filterSimple.get(ucKey));
+            } catch (NumberFormatException ignored) {}
+            filterSimple.remove(ucKey); //bỏ ra để whereSpec không đụng vào
+        }
+
+        Specification<User> specs = Specification
+            .where(BaseSpecification.<User>keywordSpec(keyword, searchFields))
+            .or(BaseSpecification.<User>keywordSpecLoose(keyword, searchFields))
+            .and(BaseSpecification.<User>whereSpec(filterSimple));
+
+        // Nếu có catalogueId, tạo biến final và dùng trong lambda
+        if (parsedCatalogueId != null) {
+            final Long finalCatalogueId = parsedCatalogueId; // final để lambda capture được
+            specs = specs.and((root, query, cb) -> {
+                Join<User, UserCatalogueUser> join = root.join("userCatalogueUsers", JoinType.INNER);
+                query.distinct(true); // tránh duplicate rows khi join
+                return cb.equal(join.get("userCatalogueId"), finalCatalogueId);
+            });
+        }
 
         return specs;
     }
@@ -115,6 +140,16 @@ public class UserService extends BaseService implements UserServiceInterface, Us
     public UserDto getUserById(Long id, String accessToken) {
         return getUserById(id);
     }
+
+    // @Override
+    // public User getUserById(Long id) {
+    //     return userRepository.findById(id).orElse(null);
+    // }
+
+    // @Override
+    // public User getUserById(Long id, String accessToken) {
+    //     return getUserById(id);
+    // }
 
     @Override
     public UserDto getUserByEmail(String email) {
@@ -180,7 +215,7 @@ public class UserService extends BaseService implements UserServiceInterface, Us
 
     @Override
     @Transactional
-    public void updateStatusByField(Long id, UpdateRequest request) {
+    public void updateStatusByField(Long id, UpdatePublishRequest request) {
         Optional<User> userId = userRepository.findById(id);
         if (userId.isEmpty()) {
             throw new IllegalArgumentException("Không tìm thấy người dùng với ID: " + id);
@@ -212,4 +247,107 @@ public class UserService extends BaseService implements UserServiceInterface, Us
         });
     }
 
+    @Override
+    @Transactional
+    public User create(StoreRequest request, Long addedBy) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email đã tồn tại");
+        }
+
+        if (userRepository.existsByPhone(request.getPhone())) {
+            throw new IllegalArgumentException("Số điện thoại đã tồn tại");
+        }
+
+        User user = User.builder()
+                .firstName(request.getFirstName())
+                .middleName(request.getMiddleName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .phone(request.getPhone())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .img(request.getImg())
+                .birthDate(request.getBirthDate())
+                .gender(request.getGender())
+                .publish(request.getPublish())
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        // map catalogueIds → UserCatalogueUser
+        if (request.getUserCatalogueIds() != null && !request.getUserCatalogueIds().isEmpty()) {
+            List<UserCatalogueUser> relations = request.getUserCatalogueIds().stream()
+                    .map(catalogueId -> UserCatalogueUser.builder()
+                            .userId(savedUser.getId())
+                            .userCatalogueId(catalogueId)
+                            .build())
+                    .toList();
+
+            userCatalogueUserRepository.saveAll(relations);
+            savedUser.setUserCatalogueUsers(relations); // để controller trả về luôn
+        }
+
+        return savedUser;
+    }
+
+    @Override
+    @Transactional
+    public User update(Long id, UpdateRequest request, Long updatedBy) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user với id = " + id));
+
+        // check trùng email, phone (trừ chính nó)
+        if (userRepository.existsByEmailAndIdNot(request.getEmail(), id)) {
+            throw new IllegalArgumentException("Email đã tồn tại");
+        }
+
+        if (userRepository.existsByPhoneAndIdNot(request.getPhone(), id)) {
+            throw new IllegalArgumentException("Số điện thoại đã tồn tại");
+        }
+
+        // update field
+        user.setFirstName(request.getFirstName());
+        user.setMiddleName(request.getMiddleName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setImg(request.getImg());
+        user.setBirthDate(request.getBirthDate());
+        user.setGender(request.getGender());
+        user.setPublish(request.getPublish());
+
+        User savedUser = userRepository.save(user);
+
+        userCatalogueUserRepository.deleteByUserId(savedUser.getId());
+        if (request.getUserCatalogueIds() != null && !request.getUserCatalogueIds().isEmpty()) {
+            List<UserCatalogueUser> relations = request.getUserCatalogueIds().stream()
+                    .map(catalogueId -> UserCatalogueUser.builder()
+                            .userId(savedUser.getId())
+                            .userCatalogueId(catalogueId)
+                            .build())
+                    .toList();
+
+            userCatalogueUserRepository.saveAll(relations);
+            savedUser.setUserCatalogueUsers(relations);
+        }
+
+        return savedUser;
+    }
+
+    @Override
+    public User view(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user với id = " + id));
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id, Long deletedBy) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user với id = " + id));
+
+        // nếu muốn, có thể lưu thông tin deletedBy vào bảng log
+
+        userCatalogueUserRepository.deleteByUserId(user.getId());
+        userRepository.delete(user);
+    }
 }

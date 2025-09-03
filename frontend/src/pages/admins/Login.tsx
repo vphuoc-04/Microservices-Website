@@ -10,8 +10,8 @@ import { login } from "../../services/AuthService";
 import { useDispatch } from "react-redux";
 import { setToast } from "../../redux/slice/toastSlice";
 
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input";
+import CustomButton from "@/components/admins/CustomButton";
 
 type Inptus = {
     email: string,
@@ -90,13 +90,7 @@ const Login = () => {
                             </div>
                         </div>
                         <div className="mt-6">
-                            <Button               
-                                className="w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-400 cursor-pointer"
-                                type="submit"
-                                disabled={loading}
-                            >
-                                {loading ? <div className="spinner"></div> : "Login"}
-                            </Button>
+                            <CustomButton loading={loading} text="Login" />
                         </div>
                         <div className="text-blue-500 text-xs mt-2 cursor-pointer hover:text-blue-700 transition"> Forgot password? </div>
                         <p className="text-xs mt-2">Welcome to the E-commerce Market, here is every product you want</p>

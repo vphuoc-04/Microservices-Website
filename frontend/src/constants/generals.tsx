@@ -8,6 +8,10 @@ export const perpages = [
 
 export const publishs = [
     {
+        id: 0,
+        name: 'Tất cả'
+    }, 
+    {
         id: 1,
         name: 'Không xuất bản'
     }, 
@@ -15,4 +19,34 @@ export const publishs = [
         id: 2,
         name: 'Xuất bản'
     }, 
+]
+
+export const sorts = [
+    {
+        id: 'id,desc',
+        name: 'Mới nhất'
+    },
+    {
+        id: 'id,asc',
+        name: 'Cũ nhất'
+    },
+]
+
+export const genders = [
+    {
+        id: 0,
+        name: 'Tất cả'
+    }, 
+    {
+        id: 1,
+        name: 'Nam'
+    }, 
+    {
+        id: 2,
+        name: 'Nữ'
+    }, 
+    {
+        id: 3,
+        name: 'Khác'
+    }
 ]

@@ -21,6 +21,16 @@ const useTable = ({model, pagination}: UseTableProps) => {
 
     const { isLoading, data, isError, refetch } = useQuery(['users', queryString], () => pagination(queryString))
 
+    const buildLinks = (pageData: any) => {
+        if (!pageData) return [];
+
+        return Array.from({ length: pageData.totalPages }, (_, i) => ({
+            url: `?page=${i + 1}`,
+            label: (i + 1).toString(),
+            active: i === pageData.page
+        }));
+    };
+
     const handlePageChange = (page: number) => {
         setPage(page);
         navigate(`?${queryString}`)
@@ -32,7 +42,7 @@ const useTable = ({model, pagination}: UseTableProps) => {
         const query = Object.keys(filters)
             .filter(key => {
                 const value = filters[key]
-                if ((key === "parent_id" || key === "publish") && Number(value) === 0) return false;
+                if ((key === "parent_id" || key === "publish" || key === "gender" || key === "userCatalogueId" ) && Number(value) === 0) return false;
                 if (key === "perpage" && (value === "" || value === null)) return false;
                 return true;
             })
@@ -53,6 +63,7 @@ const useTable = ({model, pagination}: UseTableProps) => {
         data,
         isError,
         refetch,
+        buildLinks,
         handlePageChange,
         handleQueryString
     }

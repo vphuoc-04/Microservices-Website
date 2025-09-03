@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.user_service.entities.User;
 import com.example.user_service.entities.UserCatalogueUser;
 import com.example.user_service.repositories.UserCatalogueUserRepository;
+import com.example.user_service.repositories.UserRepository;
 
 @RestController
 @RequestMapping("/api/v1/user_catalogue_user")
@@ -23,14 +25,26 @@ public class UserCatalogueUserController {
     @Autowired
     private UserCatalogueUserRepository userCatalogueUserRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @PostMapping
     public ResponseEntity<?> assignUsers(@RequestBody Map<String, Object> request) {
         Long userCatalogueId = Long.valueOf(request.get("catalogueId").toString());
         List<Integer> userIds = (List<Integer>) request.get("userIds");
+
         for (Integer userId : userIds) {
-            userCatalogueUserRepository.save(new UserCatalogueUser(userId.longValue(), userCatalogueId));
+            User user = userRepository.findById(userId.longValue())
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+            UserCatalogueUser entity = new UserCatalogueUser();
+            entity.setUserId(user.getId());
+            entity.setUserCatalogueId(userCatalogueId);
+            entity.setUser(user); // nếu bạn có mapping ManyToOne<User>
+            userCatalogueUserRepository.save(entity);
         }
-        return ResponseEntity.ok().build();
+
+        return ResponseEntity.ok("Users assigned to catalogue successfully");
     }
 
     @GetMapping("/catalogues/{userId}")

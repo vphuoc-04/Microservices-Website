@@ -22,8 +22,6 @@ interface PaginationProps {
 }
 
 const Paginate: React.FC<PaginationProps> = ({ links, onPageChange }) => {
-    console.log(links)
-
     if (!links || links.length === 0) {
         return null
     }

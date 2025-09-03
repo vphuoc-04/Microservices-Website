@@ -8,32 +8,38 @@ import {
 
 import { FilterProps } from "@/interfaces/BaseServiceInterface"
 import { Button } from "../ui/button"
-import { Link } from "react-router-dom"
 import { FaPlus } from "react-icons/fa"
-import { perpages, publishs } from "@/constants/generals"
+import { genders, perpages, publishs, sorts } from "@/constants/generals"
 import { Input } from "../ui/input"
 import { useEffect, useState } from "react"
 import useFilterAction from "@/hooks/useFilterAction"
 import CustomAlertDialog from "./CustomAlertDialog"
 import useDebounce from "@/hooks/useDebounce"
+import useCatalogue from "@/hooks/useCatalogue"
+
 
 interface FilterInterface {
     perpage: string | number,
     publish: string | number,
-    parent_id: string | number
+    userCatalogueId: string | number,
+    gender: string | number,
+    sort: string | number
 }
 
-const Filter = ({ isAnyChecked, checkedState, model, refetch, handleQueryString }: FilterProps) => {
+const Filter = ({ isAnyChecked, checkedState, model, refetch, handleQueryString, openSheet }: FilterProps) => {
     const [alertDialogOpen, setAlertDialogOpen] = useState<boolean>(false)
     const [actionSelectedValue, setActionSelectedValue] = useState<string>('')
     const [filters, setFilters] = useState<FilterInterface>({
         perpage: '',
         publish: 0,
-        parent_id: 0
+        userCatalogueId: 0,
+        gender: 0,
+        sort: 'id,asc'
     })
     const [keyword, setKeyword] = useState<string>('')
 
     const { actionSwitch } = useFilterAction();
+    const catalogues = useCatalogue()
 
     const openAlertDialog = (value: string) => {
         setAlertDialogOpen(true)
@@ -77,7 +83,6 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch, handleQueryString 
     return (
         <>
             <div className="mb-[15px]">
-
                 <CustomAlertDialog 
                     isOpen={alertDialogOpen}
                     title="Bạn có chắc chắn muốn thực hiện chức năng này?"
@@ -86,39 +91,30 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch, handleQueryString 
                     closeAlertDialog={closeAlertDialog}
                     confirmAction={() => confirmAction(actionSelectedValue)}
                 />
-
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center">
+                <div className="flex justify-between items-start flex-wrap gap-35">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-2 gap-y-4 flex-1">
                         <div className="mr-[15px]">
-                            {isAnyChecked && (
-                                <Select onValueChange={(value) => openAlertDialog(value)}>
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Chọn thao tác" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="deleteMany">
-                                            <div className="">
-                                                Xóa
-                                            </div>
-                                        </SelectItem>
-                                        <SelectItem value="publish|2">
-                                            <div className="">
-                                                Xuất bản
-                                            </div>
-                                        </SelectItem>
-                                        <SelectItem value="publish|1">
-                                            <div className="">
-                                                Ngừng xuất bản
-                                            </div>
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            )}
+                            <Select onValueChange={(value) => openAlertDialog(value)} disabled={!isAnyChecked}>
+                                <SelectTrigger className="w-[160px]" disabled={!isAnyChecked}>
+                                    <SelectValue placeholder="Chọn thao tác" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="deleteMany">
+                                        <div className="">Xóa</div>
+                                    </SelectItem>
+                                    <SelectItem value="publish|2">
+                                        <div className="">Xuất bản</div>
+                                    </SelectItem>
+                                    <SelectItem value="publish|1">
+                                        <div className="">Ngừng xuất bản</div>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         <div className="mr-[15px]">
                             <Select onValueChange={(value) => handleFilter(value, 'perpage')}>
-                                <SelectTrigger className="w-[180px]">
+                                <SelectTrigger className="w-[160px]">
                                     <SelectValue placeholder="Chọn số bản ghi" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -131,7 +127,7 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch, handleQueryString 
 
                         <div className="mr-[15px]">
                             <Select onValueChange={(value) => handleFilter(value, 'publish')}>
-                                <SelectTrigger className="w-[180px]">
+                                <SelectTrigger className="w-[160px]">
                                     <SelectValue placeholder="Chọn trạng thái" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -143,11 +139,40 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch, handleQueryString 
                         </div>
 
                         <div className="mr-[15px]">
-                            <Select onValueChange={(value) => handleFilter(value, 'parent_id')}>
-                                <SelectTrigger className="w-[180px]">
+                            <Select onValueChange={(value) => handleFilter(value, 'userCatalogueId')}>
+                                <SelectTrigger className="w-[160px]">
                                     <SelectValue placeholder="Chọn danh mục" />
                                 </SelectTrigger>
                                 <SelectContent>
+                                    {catalogues && catalogues.map((catalogue, index) => (
+                                        <SelectItem key={index} value={String(catalogue.id)}>{catalogue.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="mr-[15px]">
+                            <Select onValueChange={(value) => handleFilter(value, 'sort')}>
+                                <SelectTrigger className="w-[160px]">
+                                    <SelectValue placeholder="Sắp xếp" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {sorts && sorts.map((sort, index) => (
+                                        <SelectItem key={index} value={String(sort.id)}>{sort.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="mr-[15px]">
+                            <Select onValueChange={(value) => handleFilter(value, 'gender')}>
+                                <SelectTrigger className="w-[160px]">
+                                    <SelectValue placeholder="Giới tính" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {genders && genders.map((gender, index) => (
+                                        <SelectItem key={index} value={String(gender.id)}>{gender.name}</SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -159,11 +184,12 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch, handleQueryString 
                             />
                         </div>
                     </div>
-                    <div>
-                        <Button className="bg-teal-600 cursor-pointer">
-                            <Link to="users/add_user" className="text-whte flex justify-between items-center gap-1">
-                                <FaPlus />Thêm thành viên mới
-                            </Link>
+                    <div className="shrink-0">
+                        <Button 
+                            className="bg-teal-600 cursor-pointer text-white flex justify-between items-center gap-1" 
+                            onClick={() =>openSheet({ open: true, action: '', id: null })}
+                        >
+                            <FaPlus />Thêm thành viên mới
                         </Button>
                     </div>
                 </div>

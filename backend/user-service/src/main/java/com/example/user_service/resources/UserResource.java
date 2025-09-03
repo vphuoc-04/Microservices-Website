@@ -1,5 +1,7 @@
 package com.example.user_service.resources;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Builder;
@@ -10,6 +12,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserResource {
     private final Long id;
+    private final String img;
     private final Integer publish;
     private final String email;
     private final String firstName;
@@ -17,5 +20,9 @@ public class UserResource {
     private final String middleName;
     private final String phone;
     private final String password;
+    private final String birthDate;
+    private final Integer gender;
+
+    private final List<Long> userCatalogueIds;
 }
 

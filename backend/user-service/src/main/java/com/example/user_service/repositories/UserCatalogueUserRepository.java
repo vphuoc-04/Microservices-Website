@@ -16,4 +16,5 @@ public interface UserCatalogueUserRepository extends JpaRepository<UserCatalogue
     void deleteByUserCatalogueId(Long userCatalogueId);
 
     List<UserCatalogueUser> findByUserCatalogueId(Long userCatalogueId);
+    void deleteByUserId(Long userId);
 } 

@@ -63,6 +63,10 @@ public class SecurityConfig {
                     "/api/v1/users/delete_many",
                     "/api/v1/users/{id}/publish",
                     "/api/v1/users/update_field",
+                    "/api/v1/users/create",
+                    "/api/v1/users/update/{id}",
+                    "/api/v1/users/view/{id}",
+                    "/api/v1/users/delete/{id}",
                     "/api/v1/user_catalogue_user/**"
                 ).permitAll()
                 .requestMatchers("/api/v1/users/me").authenticated()

@@ -1,5 +1,4 @@
 import React from "react"
-import { Link } from "react-router-dom"
 import {
   Breadcrumb,
   BreadcrumbItem as UIBreadcrumbItem,
@@ -27,7 +26,8 @@ const PageHeading: React.FC<PageHeadingProps> = ({ breadcrumb }) => {
                             <React.Fragment key={`${item.route}-${index}`}>
                                 {index > 0 && <BreadcrumbSeparator />}
                                 <UIBreadcrumbItem>
-                                <Link to={item.route}>{item.title}</Link>
+                                {/* <Link to={item.route}>{item.title}</Link> */}
+                                <span>{item.title}</span>
                                 </UIBreadcrumbItem>
                             </React.Fragment>
                         ))}
