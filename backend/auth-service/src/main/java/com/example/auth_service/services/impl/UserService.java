@@ -31,9 +31,42 @@ public class UserService implements UserServiceInterface, org.springframework.se
 
     @Override
     public UserDto getUserById(Long id) {
-        // Có thể trả về null hoặc throw exception, vì Auth Service không dùng hàm này trực tiếp
+        try {
+            String url = userServiceUrl + "/api/v1/users/" + id;
+            ResponseEntity<JsonNode> response = restTemplate.getForEntity(url, JsonNode.class);
+            
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                JsonNode data = response.getBody().get("data");
+                if (data != null) {
+                    return objectMapper.treeToValue(data, UserDto.class);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching user by ID: " + e.getMessage());
+            e.printStackTrace();
+        }
         return null;
     }
+
+    // public UserDto getUserById(Long id, String accessToken) {
+    //     try {
+    //         String url = userServiceUrl + "/api/v1/users/" + id;
+    //         HttpHeaders headers = new HttpHeaders();
+    //         headers.set("Authorization", accessToken);
+    //         HttpEntity<?> entity = new HttpEntity<>(headers);
+    //         ResponseEntity<JsonNode> response = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
+    //         System.out.println("DEBUG: Response từ user-service: " + response.getBody());
+    //         // Parse JSON trả về
+    //         JsonNode dataNode = response.getBody().get("data");
+    //         if (dataNode != null && !dataNode.isNull()) {
+    //             ObjectMapper mapper = new ObjectMapper();
+    //             return mapper.treeToValue(dataNode, UserDto.class);
+    //         }
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    //     return null;
+    // }
 
     public UserDto getUserById(Long id, String accessToken) {
         try {
@@ -41,19 +74,27 @@ public class UserService implements UserServiceInterface, org.springframework.se
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", accessToken);
             HttpEntity<?> entity = new HttpEntity<>(headers);
-            ResponseEntity<JsonNode> response = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
+
+            ResponseEntity<JsonNode> response = restTemplate.exchange(
+                url, HttpMethod.GET, entity, JsonNode.class);
+
             System.out.println("DEBUG: Response từ user-service: " + response.getBody());
-            // Parse JSON trả về
+
             JsonNode dataNode = response.getBody().get("data");
             if (dataNode != null && !dataNode.isNull()) {
                 ObjectMapper mapper = new ObjectMapper();
-                return mapper.treeToValue(dataNode, UserDto.class);
+                mapper.findAndRegisterModules(); // hỗ trợ JavaTimeModule cho LocalDateTime
+
+                UserDto user = mapper.convertValue(dataNode, UserDto.class);
+                System.out.println("DEBUG: UserDto sau khi map: " + user);
+                return user;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
+    
 
     @Override
     public UserDto getUserByEmail(String email) {
@@ -99,15 +140,27 @@ public class UserService implements UserServiceInterface, org.springframework.se
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDto user = getUserByEmail(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found with email: " + username);
+        System.out.println("DEBUG: loadUserByUsername nhận vào: " + username);
+
+        UserDto user = null;
+        if (username.matches("\\d+")) {
+            System.out.println("DEBUG: username là ID -> gọi getUserById");
+            user = getUserById(Long.parseLong(username));
+        } else {
+            System.out.println("DEBUG: username là email -> gọi getUserByEmail");
+            user = getUserByEmail(username);
         }
-        
+
+        System.out.println("DEBUG: UserDto trả về: " + user);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found: " + username);
+        }
+
         return org.springframework.security.core.userdetails.User.builder()
-            .username(user.getEmail())
-            .password("") // Password is not available in DTO for security reasons
-            .roles("USER")
-            .build();
+                .username(user.getEmail())
+                .password("")
+                .roles("USER")
+                .build();
     }
 } 

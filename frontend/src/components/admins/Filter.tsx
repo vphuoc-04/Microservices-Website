@@ -16,7 +16,7 @@ import useFilterAction from "@/hooks/useFilterAction"
 import CustomAlertDialog from "./CustomAlertDialog"
 import useDebounce from "@/hooks/useDebounce"
 import useCatalogue from "@/hooks/useCatalogue"
-
+import useDialog from "@/hooks/useDialog"
 
 interface FilterInterface {
     perpage: string | number,
@@ -27,34 +27,28 @@ interface FilterInterface {
 }
 
 const Filter = ({ isAnyChecked, checkedState, model, refetch, handleQueryString, openSheet }: FilterProps) => {
-    const [alertDialogOpen, setAlertDialogOpen] = useState<boolean>(false)
-    const [actionSelectedValue, setActionSelectedValue] = useState<string>('')
     const [filters, setFilters] = useState<FilterInterface>({
         perpage: '',
         publish: 0,
         userCatalogueId: 0,
         gender: 0,
-        sort: 'id,asc'
+        sort: 0
     })
+    const [actionValue, setActionValue] = useState("")
     const [keyword, setKeyword] = useState<string>('')
 
+    const { alertDialogOpen, openAlertDialog, closeAlertDialog, confirmAction, isLoading: isDialogLoading } = useDialog(refetch, {
+        onSuccessCallback: () => setActionValue(""), 
+    })
     const { actionSwitch } = useFilterAction();
-    const catalogues = useCatalogue()
+    const catalogues = useCatalogue(true)
 
-    const openAlertDialog = (value: string) => {
-        setAlertDialogOpen(true)
-        setActionSelectedValue(value)
-    }
-
-    const closeAlertDialog = () => {
-        setAlertDialogOpen(false)
-        setActionSelectedValue('')
-    }
-
-    const confirmAction = (value: string): void => {
-        const [action, selectedValue] = value.split('|');
-        actionSwitch(action, selectedValue, { checkedState }, model, refetch)
-        closeAlertDialog()
+    const handleActionChange = (value: string) => {
+        openAlertDialog(value, (id: number) => {
+            console.log(value, id);
+            const [action, selectedValue] = value.split("|")
+            return actionSwitch(action, selectedValue, { checkedState }, model, refetch)
+        })
     }
 
     const { debounce } = useDebounce()
@@ -73,7 +67,7 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch, handleQueryString,
     }
 
     useEffect(() => {
-        console.log(checkedState)
+        
     }, [checkedState])
 
     useEffect(() => {
@@ -89,12 +83,13 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch, handleQueryString,
                     description="Thao tác này không thể hoàn tác. Thao tác này sẽ xóa vĩnh viễn tài khoản của bạn
                     và xóa dữ liệu của bạn khỏi máy chủ của chúng tôi."
                     closeAlertDialog={closeAlertDialog}
-                    confirmAction={() => confirmAction(actionSelectedValue)}
+                    confirmAction={() => confirmAction()}
+                    isDialogLoading={isDialogLoading}
                 />
                 <div className="flex justify-between items-start flex-wrap gap-35">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-2 gap-y-4 flex-1">
                         <div className="mr-[15px]">
-                            <Select onValueChange={(value) => openAlertDialog(value)} disabled={!isAnyChecked}>
+                            <Select value={actionValue} onValueChange={handleActionChange} disabled={!isAnyChecked}>
                                 <SelectTrigger className="w-[160px]" disabled={!isAnyChecked}>
                                     <SelectValue placeholder="Chọn thao tác" />
                                 </SelectTrigger>
@@ -145,7 +140,7 @@ const Filter = ({ isAnyChecked, checkedState, model, refetch, handleQueryString,
                                 </SelectTrigger>
                                 <SelectContent>
                                     {catalogues && catalogues.map((catalogue, index) => (
-                                        <SelectItem key={index} value={String(catalogue.id)}>{catalogue.name}</SelectItem>
+                                        <SelectItem key={index} value={String(catalogue.id)}>{catalogue.label}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>

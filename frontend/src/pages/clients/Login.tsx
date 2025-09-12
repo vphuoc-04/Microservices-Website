@@ -8,6 +8,7 @@ import { login } from "@/services/AuthService";
 // Redux
 import { useDispatch } from "react-redux";
 import { setToast } from "@/redux/slice/toastSlice";
+import { setAuthLogin } from "@/redux/slice/authSlice";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,12 @@ const Login = () => {
         try {
             const loggedIn = await login(payload);
             if (loggedIn) {
+                // Get user data from localStorage and update Redux
+                const userStr = localStorage.getItem('user');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    dispatch(setAuthLogin(user));
+                }
                 dispatch(setToast({ message: 'Login successfully', type: 'success' }));
                 navigate('/');
             }

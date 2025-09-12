@@ -1,16 +1,12 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-// Types
-import { User } from "../../types/User";
 
 // Services
 import { logout } from "../../services/AuthService";
-import { me } from "../../services/UserService";
 
 // Redux
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setAuthLogout } from "../../redux/slice/authSlice";
+import { RootState } from "@/redux/store";
 
 import {
     DropdownMenu,
@@ -22,19 +18,9 @@ import {
   } from "@/components/ui/dropdown-menu"
 
 const Header = () => {
-    const [user, setUser] = useState<User | null>(null);
-
     const navigate = useNavigate()
     const dispatch = useDispatch()
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-            const userData = await me();
-            setUser(userData);
-        };
-        fetchUserData();
-    }, []);
-
+    const authUser = useSelector((state: RootState) => state.auth.user)
 
     const logoutHandler = async () => {
         const result = await logout();
@@ -60,7 +46,7 @@ const Header = () => {
                         />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="center">
-                        <DropdownMenuLabel>{user?.firstName} {user?.middleName} {user?.lastName}</DropdownMenuLabel>
+                        <DropdownMenuLabel>{authUser?.firstName} {authUser?.middleName} {authUser?.lastName}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="cursor-pointer">Profile</DropdownMenuItem>

@@ -19,6 +19,7 @@ export const toastSlice = createSlice({
     reducers: {
 
         setToast: (state, action: PayloadAction<{message: string, type: ToastType}>) => {
+            console.log("TOAST DISPATCHED:", action.payload)
             state.message = action.payload.message
             state.type = action.payload.type
         },

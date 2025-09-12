@@ -20,7 +20,8 @@ const useFilterAction = () => {
                 break;
 
             case 'publish':
-                await updateFieldByParams(ids, model, Number(selectedValue), refetch);
+                await updateFieldByParams(ids, model, Number(selectedValue));
+                refetch(); 
                 break;
                 
             default:

@@ -1,4 +1,8 @@
-import { breadcrumb, model, pagination, tableColumn, remove } from "@/services/UserService";
+// Services
+import { model, pagination, remove } from "@/services/UserService";
+
+// Settings
+import { breadcrumb, tableColumn } from "@/settings/user";
 
 // Components
 import {
@@ -23,6 +27,7 @@ import useCheckBoxState from "@/hooks/useCheckBoxState";
 import useTable from "@/hooks/useTable";
 import useSheet from "@/hooks/useSheet";
 import CustomSheet from "@/components/admins/CustomSheet";
+
 import UserStore from "./Store";
 
 const User = ({}) => {
@@ -52,7 +57,7 @@ const User = ({}) => {
                             openSheet={openSheet}
                         />
                         <CustomTable 
-                            isLoading = {isLoading}
+                            isLoading={isLoading}
                             data={data}
                             isError={isError}
                             model={model}
@@ -63,6 +68,7 @@ const User = ({}) => {
                             handleCheckedAllChange={handleCheckedAllChange}
                             openSheet={openSheet}
                             remove={remove}
+                            refetch={refetch}
                         />
                     </CardContent>
                     <CardFooter>
@@ -89,6 +95,8 @@ const User = ({}) => {
                     className="w-[500px] sm:w-[550px]"
                 >
                     <UserStore 
+                        refetch={refetch}
+                        closeSheet={closeSheet}
                         userId={isSheetOpen.id}
                         action={isSheetOpen.action}
                     />

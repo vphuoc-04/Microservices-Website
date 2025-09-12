@@ -1,40 +1,29 @@
 import { PropsWithChildren, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 // Redux
 import { RootState } from "../redux/store";
-import { setAuthLogin, setAuthLogout } from "../redux/slice/authSlice";
-
-// Services
-import { me } from "../services/UserService";
 
 type ProtectedRouteProps = PropsWithChildren;
 
 const AuthMiddleware = ({ children }: ProtectedRouteProps) => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    
     const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
 
     useEffect(() => {
-        const checkAuthenticate = async () => {
-            if (!isAuthenticated || !user) {
-                const userData = await me();
-                if (userData) {
-                    dispatch(setAuthLogin(userData));
-                } else {
-                    dispatch(setAuthLogout());
-                    navigate("/admin/login");
-                }
-            }
-        };
+        // If not authenticated, redirect to login
+        if (!isAuthenticated || !user) {
+            navigate("/admin/login");
+        }
+    }, [isAuthenticated, user, navigate]);
+
+    // If not authenticated, don't render children
+    if (!isAuthenticated || !user) {
+        return null;
+    }
     
-        checkAuthenticate();
-    }, [isAuthenticated, user, dispatch, navigate]);
-    
-    
-    return isAuthenticated && user ? children : null;
+    return children;
 };
 
 export default AuthMiddleware;

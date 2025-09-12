@@ -46,9 +46,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService, UserDetailsService userDetailsService, ObjectMapper objectMapper, TokenValidatorImpl tokenValidator) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
+            .cors(cors -> {})
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/api/v1/auth/login",
+                    "/api/v1/auth/logout",
                     "/api/v1/auth/refresh_token",
                     "/api/v1/auth/register"
                 ).permitAll()

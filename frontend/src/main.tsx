@@ -14,6 +14,9 @@ import {
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
+// Providers
+import AuthProvider from './providers/AuthProvider'
+
 // Middlewares
 import NoAuthMiddleware from './middlewares/NoAuthMiddleware.tsx'
 import AuthMiddleware from './middlewares/AuthMiddleware.tsx'
@@ -35,69 +38,71 @@ import RegisterCustomer from './pages/clients/Register.tsx'
 import Home from './pages/clients/Home.tsx'
 
 const router = createBrowserRouter([
-  {
-    path: '/admin/login',
-    element: (
-      <NoAuthMiddleware>
-        <LoginDashboard />
-      </NoAuthMiddleware>
-    )
-  },
-  {
-    path: '/admin',
-    element: (
-      <AuthMiddleware>
-        <LayoutDashboard />
-      </AuthMiddleware>
-    ),
-    children: [
-      { path: 'dashboard', element: <DashboardPanel /> },
+    {
+        path: '/admin/login',
+        element: (
+            <NoAuthMiddleware>
+                <LoginDashboard />
+            </NoAuthMiddleware>
+        )
+    },
+    {
+        path: '/admin',
+        element: (
+            <AuthMiddleware>
+                <LayoutDashboard />
+            </AuthMiddleware>
+        ),
+        children: [
+            { path: 'dashboard', element: <DashboardPanel /> },
 
-      // User
-      { path: 'user/users', element: <User /> },
-      { path: 'user/catalogue', element: <Catalogue /> },
+            // User
+            { path: 'user/users', element: <User /> },
+            { path: 'user/catalogue', element: <Catalogue /> },
 
-      // Permission
-      { path: 'permission/permissions', element: <Permission /> }
-    ]
-  },
+            // Permission
+            { path: 'permission/permissions', element: <Permission /> }
+        ]
+    },
 
-  {
-    path: '/login', 
-    element: (
-      <NoAuthMiddleware>
-        <LoginCustomer />
-      </NoAuthMiddleware>
-    )
-  },
-  {
-    path: '/register',
-    element: (
-      <NoAuthMiddleware>
-        <RegisterCustomer />
-      </NoAuthMiddleware>
-    )
-  },
-  {
-    path: '/',
-    element: (
-      <AuthMiddleware>
-        <LayoutCustomer />
-      </AuthMiddleware>
-    ),
-    children: [
-      { path: '/', element: <Home /> }
-    ]
-  }
+    {
+        path: '/login', 
+        element: (
+            <NoAuthMiddleware>
+                <LoginCustomer />
+            </NoAuthMiddleware>
+        )
+    },
+    {
+        path: '/register',
+        element: (
+            <NoAuthMiddleware>
+                <RegisterCustomer />
+            </NoAuthMiddleware>
+        )
+    },
+    {
+        path: '/',
+        element: (
+            <AuthMiddleware>
+                <LayoutCustomer />
+            </AuthMiddleware>
+        ),
+        children: [
+          { path: '/', element: <Home /> }
+        ]
+    }
 ]);
 
 const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')!).render(
-  <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <ToastContainer position='top-center' />
-      </QueryClientProvider>
-  </Provider>
+    <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+                <RouterProvider router={router} />
+            </AuthProvider>
+            <ToastContainer position='top-right' />
+        </QueryClientProvider>
+    </Provider>
 )

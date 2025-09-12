@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-//import { useEffect } from "react";
+import { useEffect } from "react";
 
 import {
     Accordion,
@@ -14,24 +14,13 @@ import { sidebarItem } from "../../constants/sidebar";
 const Aside = () => {
     const location = useLocation();
     const segment = location.pathname.split('/')[2]
-    console.log(segment);
-
-    // const getOpenAccordionValue = () => {
-    //     for (let groupIndex = 0; groupIndex < sidebarItem.length; groupIndex++) {
-    //         const group = sidebarItem[groupIndex];
-    //         for (let itemIndex = 0; itemIndex < group.items.length; itemIndex++) {
-    //             const item = group.items[itemIndex];
-    //             if (item.active.includes(segment)) {
-    //                 return `item-${groupIndex}-${itemIndex}`
-    //             }
-    //         }
-    //     }
-    // }
-
-    // const defaultValue = getOpenAccordionValue();
+    
+    useEffect(() => {
+        console.log(segment);
+    }, [segment]);
 
     return (
-        <div className="w-70 h-screen bg-teal-600 text-white p-5 flex flex-col">
+        <div className="w-70 min-h-screen bg-teal-600 text-white p-5 flex flex-col">
             <div className="text-lg font-bold mb-5">
                 Logo
             </div>
@@ -47,7 +36,7 @@ const Aside = () => {
                                             key={itemIndex} 
                                             to={'to' in item ? item.to : '#'}
                                             className={`flex items-center gap-2 px-3 py-5 w-full rounded-md cursor-pointer
-                                                ${item.active.includes(segment) ? 'text-white bg-[rgba(255,255,255,0.1)]' : 'text-gray-300'}
+                                                ${item.active.includes(segment) ? 'text-white bg-[rgba(255,255,255,0.1)]' : 'text-[#c9c5c5]'}
                                             `}
                                         >
                                             {item.icons}
@@ -59,7 +48,7 @@ const Aside = () => {
                                                 className={`
                                                     flex items-center gap-2 px-3 py-2 w-full cursor-pointer
                                                     [&>svg]:stroke-white
-                                                    ${item.active.includes(segment) ? 'text-white bg-[rgba(255,255,255,0.1)]' : 'text-gray-300'}
+                                                    ${item.active.includes(segment) ? 'text-white bg-[rgba(255,255,255,0.1)]' : 'text-[#c9c5c5]'}
                                                 `}
                                             >
                                                 <div className=" menu-label flex items-center gap-2 rounded-md w-50 py-3">
@@ -80,7 +69,7 @@ const Aside = () => {
                                                                         py-3 pl-3 w-full rounded-[5px]
                                                                         ${isActiveLink
                                                                         ? 'text-white bg-[rgba(255,255,255,0.1)]'
-                                                                        : 'text-gray-300 hover:bg-[rgba(255,255,255,0.1)]'}
+                                                                        : 'text-[#c9c5c5] hover:bg-[rgba(255,255,255,0.1)]'}
                                                                     `}
                                                                     >
                                                                     {link.title}

@@ -70,7 +70,7 @@ public class AuthController {
             boolean isValid = userService.validateUserCredentials(request.getEmail(), request.getPassword());
             if (!isValid) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResource.message("Invalid credentials", HttpStatus.UNAUTHORIZED));
+                    .body(ApiResource.message("Sai email hoặc mật khẩu", HttpStatus.UNAUTHORIZED));
             }
             UserDto user = userService.getUserByEmail(request.getEmail());
             if (user == null) {
@@ -95,9 +95,9 @@ public class AuthController {
                 .build();
             return ResponseEntity.ok()
                 .header("Set-Cookie", cookie.toString())
-                .body(ApiResource.ok(authResponse, "SUCCESS"));
+                .body(ApiResource.ok(authResponse, "Đăng nhập thành công"));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(ApiResource.message("Login failed", HttpStatus.INTERNAL_SERVER_ERROR));
+            return ResponseEntity.internalServerError().body(ApiResource.message("Đăng nhập thất bại", HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
 

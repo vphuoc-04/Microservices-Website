@@ -18,8 +18,12 @@ const useTable = ({model, pagination}: UseTableProps) => {
     const [page, setPage] = useState<number | null>(currentPage)
     const [queryString, setQueryString] = useState<string>('')
     const [filters, setFilters] = useState<FilterParams>({})
-
-    const { isLoading, data, isError, refetch } = useQuery(['users', queryString], () => pagination(queryString))
+    const [loading, setLoading] = useState(false);
+    const [shouldShowLoading, setShouldShowLoading] = useState(false);
+    const { isLoading, isFetching, data, isError, refetch } = useQuery(['users', queryString], () => pagination(queryString),{ 
+        keepPreviousData: true,
+        refetchOnWindowFocus: false,
+    });
 
     const buildLinks = (pageData: any) => {
         if (!pageData) return [];
@@ -31,18 +35,41 @@ const useTable = ({model, pagination}: UseTableProps) => {
         }));
     };
 
+    useEffect(() => {
+        if (isFetching) {
+            if (shouldShowLoading) setLoading(true);
+        } else {
+            const timer = setTimeout(() => {
+                setLoading(false);
+                setShouldShowLoading(false);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [isFetching, shouldShowLoading]);
+
+
     const handlePageChange = (page: number) => {
         setPage(page);
+        setShouldShowLoading(true);
         navigate(`?${queryString}`)
     }
 
-    const handleQueryString = (filterParam: FilterParams) => setFilters(filterParam)
+    const handleQueryString = (filterParam: FilterParams) => {
+        setShouldShowLoading(true);
+        setFilters(filterParam)
+    }
 
     useEffect(() => {
         const query = Object.keys(filters)
             .filter(key => {
                 const value = filters[key]
-                if ((key === "parent_id" || key === "publish" || key === "gender" || key === "userCatalogueId" ) && Number(value) === 0) return false;
+                if ((key === "parent_id" 
+                    || key === "publish" 
+                    || key === "gender" 
+                    || key === "userCatalogueId" 
+                    || key === "sort"
+                ) && Number(value) === 0) return false;
+
                 if (key === "perpage" && (value === "" || value === null)) return false;
                 return true;
             })
@@ -54,12 +81,16 @@ const useTable = ({model, pagination}: UseTableProps) => {
     }, [page, filters, refetch]);
 
     useEffect(() => {
+        setPage(1);
+    }, [filters]);
+
+    useEffect(() => {
         navigate(`?${queryString}`)
         refetch()
     }, [queryString])
 
     return {
-        isLoading,
+        isLoading: isLoading || loading, 
         data,
         isError,
         refetch,

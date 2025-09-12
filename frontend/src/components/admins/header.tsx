@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react";
+//
 import { useNavigate } from "react-router-dom";
 
+// Components
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+
 // Types
-import { User } from "../../types/User";
 
 // Services
 import { logout } from "../../services/AuthService";
-import { me } from "../../services/UserService";
 
 // Redux
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setAuthLogout } from "../../redux/slice/authSlice";
+import { RootState } from "@/redux/store";
 
 import {
     DropdownMenu,
@@ -22,18 +24,12 @@ import {
   } from "@/components/ui/dropdown-menu"
 
 const Header = () => {
-    const [user, setUser] = useState<User | null>(null);
+    // User data comes from Redux to avoid duplicate /me calls
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-            const userData = await me();
-            setUser(userData);
-        };
-        fetchUserData();
-    }, []);
+    const authUser = useSelector((state: RootState) => state.auth.user)
 
 
     const logoutHandler = async () => {
@@ -50,14 +46,15 @@ const Header = () => {
             <div className="relative mt-1 mr-10 cursor-pointer">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <img
-                            src="https://i.pinimg.com/736x/73/79/8c/73798c5c5dfb267fce136b18cf1a259c.jpg"
-                            alt="Avatar"
-                            className="w-10 h-10 rounded-full cursor-pointer"
+                        <Avatar className="w-[40px] h-[40px] cursor-pointer">
+                        <AvatarImage
+                            src={authUser?.img ? authUser?.img : "https://github.com/shadcn.png"}
                         />
+                        <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="center">
-                        <DropdownMenuLabel>{user?.firstName} {user?.middleName} {user?.lastName}</DropdownMenuLabel>
+                        <DropdownMenuLabel>{authUser?.firstName} {authUser?.middleName} {authUser?.lastName}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="cursor-pointer">Profile</DropdownMenuItem>

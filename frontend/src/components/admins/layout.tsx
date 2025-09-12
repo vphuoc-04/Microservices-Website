@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -16,14 +16,18 @@ import { Header } from "./header";
 const Layout: React.FC = () => {
     const dispatch = useDispatch();
     const { message, type } = useSelector((state: RootState) => state.toast);
+    const lastToastRef = useRef<string>("");
 
     useEffect(() => {
-        showToast(message, type);
-        dispatch(clearToast());
+        if (message && type && message !== lastToastRef.current) {
+            lastToastRef.current = message;
+            showToast(message, type);
+            dispatch(clearToast());
+        }
     }, [message, type, dispatch]);
 
     return (
-        <div className="flex w-screen">
+        <div className="flex">
             <Aside />
             <div className="flex-1 bg-gray-100 flex flex-col">
                 <Header />

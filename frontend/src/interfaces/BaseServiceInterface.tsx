@@ -1,3 +1,4 @@
+import { Option } from "@/components/admins/CustomSelectBox"
 import { Sheet } from "@/hooks/useSheet"
 import { JSX } from "react"
 
@@ -23,15 +24,38 @@ export interface FilterProps extends CheckedStateInterface, SheetProps {
     handleQueryString: any,
 }
 
+export interface CustomAlertDialogProps {
+    isOpen: boolean,
+    title: string,
+    description: string,
+    closeAlertDialog: () => void,
+    confirmAction: () => void,
+    isDialogLoading?: boolean
+}
+
 export interface CustomTableProps extends SheetProps {
     data: any,
     isLoading: boolean,
     isError: boolean,
     model: string,
-    tableColumn: Array<{ name: string; render: (item: any) => JSX.Element }>,
+    tableColumn: Array<{ name: string; className?: string, render: (item: any) => JSX.Element }>,
     checkedState: { [key:number]  : boolean },
     checkedAllState: boolean,
     handleCheckedChange: (id: number) => void
     handleCheckedAllChange: () => void,
-    remove: (id: number) => Promise<any>
+    remove: (id: string) => Promise<any>,
+    refetch: any
+}
+
+export interface SelectBoxItem {
+    title: string | undefined,
+    placeholder: string | undefined,
+    options: Option[],
+    value: Option | null,
+    rules: object,
+    name: string,
+    control: any,
+    errors: any,
+    onSelectedChange?: (value: string | undefined) => void,
+    isLoading?: boolean
 }

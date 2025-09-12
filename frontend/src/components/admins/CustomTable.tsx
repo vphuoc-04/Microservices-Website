@@ -12,17 +12,18 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import CustomAlertDialog from "@/components/admins/CustomAlertDialog";
 
 // Hooks
 import useColumnState from "@/hooks/useColumnState";
+import useDialog from "@/hooks/useDialog";
 
-// Services
-import { buttonActions, ParamsToTuple, Row } from "@/services/UserService";
+// Settings
+import { buttonActions, ParamsToTuple, Row } from "@/settings/user";
 
 // Interfaces
 import { CustomTableProps } from "@/interfaces/BaseServiceInterface";
-import CustomAlertDialog from "./CustomAlertDialog";
-import useDialog from "@/hooks/useDialog";
+
 
 const CustomTable = ({ 
     isLoading, 
@@ -35,10 +36,11 @@ const CustomTable = ({
     handleCheckedChange,
     handleCheckedAllChange,
     openSheet,
-    remove
+    remove,
+    refetch
 } : CustomTableProps) => {
     const { columnState, handleChecked, setInitialColumnState } = useColumnState();
-    const { alertDialogOpen, openAlertDialog, closeAlertDialog, confirmAction } = useDialog();
+    const { alertDialogOpen, openAlertDialog, closeAlertDialog, confirmAction, isLoading: isDialogLoading } = useDialog(refetch);
 
     const handleAlertDialog = (id: string, callback: (id: number) => Promise<any>) => {
         openAlertDialog(id, callback) 
@@ -52,7 +54,7 @@ const CustomTable = ({
 
     return (
         <>
-            <Table>
+            <Table className="border-[1px]">
                 <TableHeader>
                     <TableRow>
                         <TableHead>
@@ -103,7 +105,7 @@ const CustomTable = ({
                                 </TableCell>
 
                                 {tableColumn && tableColumn.map((column, idx) => (
-                                    <TableCell key={idx}>{column.render(row)}</TableCell>
+                                    <TableCell key={idx} className={column.className}>{column.render(row)}</TableCell>
                                 ))}
 
                                 <TableCell className="text-center">
@@ -150,6 +152,7 @@ const CustomTable = ({
                 và xóa dữ liệu của bạn khỏi máy chủ của chúng tôi."
                 closeAlertDialog={closeAlertDialog}
                 confirmAction={() => confirmAction()}
+                isDialogLoading={isDialogLoading}
             />
         </>
     )

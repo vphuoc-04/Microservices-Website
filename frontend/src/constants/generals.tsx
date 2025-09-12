@@ -30,6 +30,14 @@ export const sorts = [
         id: 'id,asc',
         name: 'Cũ nhất'
     },
+    {
+        id: 'firstName,asc',
+        name: 'A-Z'
+    },
+    {
+        id: 'firstName,desc',
+        name: 'Z-A'
+    }
 ]
 
 export const genders = [

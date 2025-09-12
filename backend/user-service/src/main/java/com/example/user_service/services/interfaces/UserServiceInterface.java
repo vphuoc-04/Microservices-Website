@@ -16,10 +16,10 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface UserServiceInterface {
     Page<User> paginate(Map<String, String[]> parameters, HttpServletRequest request);
-    UserDto getUserById(Long id);
-    UserDto getUserById(Long id, String accessToken);
-    // User getUserById(Long id);
-    // User getUserById(Long id, String accessToken);
+    // UserDto getUserById(Long id);
+    // UserDto getUserById(Long id, String accessToken);
+    User getUserById(Long id);
+    User getUserById(Long id, String accessToken);
     UserDto getUserByEmail(String email);
     boolean validateUserCredentials(String email, String password);
     UserDetails loadUserByUsername(String username);

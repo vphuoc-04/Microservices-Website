@@ -119,37 +119,39 @@ public class UserService extends BaseService implements UserServiceInterface, Us
         return specs;
     }
 
-    @Override
-    public UserDto getUserById(Long id) {
-        Optional<User> userOpt = userRepository.findById(id);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            UserDto userDto = new UserDto();
-            userDto.setId(user.getId());
-            userDto.setEmail(user.getEmail());
-            userDto.setFirstName(user.getFirstName());
-            userDto.setLastName(user.getLastName());
-            userDto.setMiddleName(user.getMiddleName());
-            userDto.setPhone(user.getPhone());
-            return userDto;
-        }
-        return null;
-    }
-
-    @Override
-    public UserDto getUserById(Long id, String accessToken) {
-        return getUserById(id);
-    }
-
     // @Override
-    // public User getUserById(Long id) {
-    //     return userRepository.findById(id).orElse(null);
+    // public UserDto getUserById(Long id) {
+    //     Optional<User> userOpt = userRepository.findById(id);
+    //     if (userOpt.isPresent()) {
+    //         User user = userOpt.get();
+    //         UserDto userDto = new UserDto();
+    //         userDto.setId(user.getId());
+    //         userDto.setEmail(user.getEmail());
+    //         userDto.setFirstName(user.getFirstName());
+    //         userDto.setLastName(user.getLastName());
+    //         userDto.setMiddleName(user.getMiddleName());
+    //         userDto.setPhone(user.getPhone());
+    //         userDto.setBirthDate(user.getBirthDate());
+    //         userDto.setGender(user.getGender());
+    //         return userDto;
+    //     }
+    //     return null;
     // }
 
     // @Override
-    // public User getUserById(Long id, String accessToken) {
+    // public UserDto getUserById(Long id, String accessToken) {
     //     return getUserById(id);
     // }
+
+    @Override
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public User getUserById(Long id, String accessToken) {
+        return getUserById(id);
+    }
 
     @Override
     public UserDto getUserByEmail(String email) {
@@ -206,6 +208,9 @@ public class UserService extends BaseService implements UserServiceInterface, Us
     @Transactional
     public boolean deleteMany(List<Long> ids) {
         try {
+            // First delete dependent rows in user_catalogue_user to satisfy FK constraints
+            userCatalogueUserRepository.deleteByUserIdIn(ids);
+            // Then delete users
             userRepository.deleteAllById(ids);
             return true;
         } catch (Exception e) {

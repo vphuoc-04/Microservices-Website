@@ -23,6 +23,6 @@ public class UserResource {
     private final String birthDate;
     private final Integer gender;
 
-    private final List<Long> userCatalogueIds;
+    private final List<Long> userCatalogueId;
 }
 

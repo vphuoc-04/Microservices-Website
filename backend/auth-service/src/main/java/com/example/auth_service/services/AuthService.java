@@ -38,7 +38,6 @@ public class AuthService extends JwtService {
         BlacklistedToken blacklistedToken = new BlacklistedToken();
         blacklistedToken.setToken(token);
         blacklistedToken.setUserId(userId);
-        blacklistedToken.setType(type);
         blacklistedToken.setExpiryDate(java.time.LocalDateTime.now().plusDays(1));
         blacklistedTokenRepository.save(blacklistedToken);
     }

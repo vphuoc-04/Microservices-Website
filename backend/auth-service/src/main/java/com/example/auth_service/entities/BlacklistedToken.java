@@ -34,9 +34,6 @@ public class BlacklistedToken {
     @Column(name="user_id")
     private Long userId;
 
-    @Column(name = "type")
-    private String type;
-
     @CreationTimestamp
     @Column(name="created_at", updatable=false)
     private LocalDateTime createdAt;

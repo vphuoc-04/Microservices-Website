@@ -15,7 +15,7 @@ const Dashboard = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        showToast(message, type)
+        // showToast(message, type)
         dispatch(clearToast())
     }, [message, type, dispatch])
 

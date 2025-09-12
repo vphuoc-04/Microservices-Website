@@ -1,117 +1,160 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useQuery } from "react-query"
 
 import { AvatarFallback } from "@radix-ui/react-avatar"
 
 // Components
-import CustomSelectBox from "@/components/admins/CustomSelectBox"
+import CustomSelectBox, { Option } from "@/components/admins/CustomSelectBox"
 import CustomInput from "@/components/admins/CustomInput"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import CustomButton from "@/components/admins/CustomButton"
 
 // Services
-import { create, getUserById, update } from "@/services/UserService"
+import { save, getUserById } from "@/services/UserService"
 
 // Hooks
 import useUpload from "@/hooks/useUpload"
 import useCatalogue from "@/hooks/useCatalogue"
 import useFormSubmit from "@/hooks/useFormSubmit"
+import useSelectedBox from "@/hooks/useSelectBox"
+import useAllDifferent from "@/hooks/useAllDifferent"
 
 // Types
-import { FormInputs, User, UserPayloads } from "@/types/User"
-import { validation } from "@/validations/user/StoreUserValidation"
+import { PayloadInputs, User } from "@/types/User"
+import { validation, mapUserToFormDefaults } from "@/validations/user/StoreUserValidation"
+
 
 interface UserStoreProps {
-  userId: string | null,
-  action: string
+    refetch: any,
+    closeSheet: () => void,
+    userId: string | null,
+    action: string
 }
 
-const UserStore = ({ userId, action }: UserStoreProps) => {
-    const { register, handleSubmit, formState: { errors }, watch, control, reset } = useForm<FormInputs>()
+const UserStore = ({ userId, action, refetch, closeSheet }: UserStoreProps) => {
+    const { register, handleSubmit, formState: { errors, isValid }, watch, control, setValue, reset, getValues } = useForm<PayloadInputs>({
+        mode:'onChange',
+        reValidateMode: 'onChange'
+    })
     const { images, handleImageChange } = useUpload(false)
-    const password = useRef({})
+    const password = useRef<string | undefined>("")
     password.current = watch("password", "")
 
-    const { data, isLoading } = useQuery<User>(
-        ['user', userId],
-        () => getUserById(userId),
+    const { data, isLoading } = useQuery<User>(['user', userId],() => getUserById(userId),
         { enabled: (action === 'update' || action === "view") && !!userId }
     )
 
+    useEffect(() => {
+        if (!isLoading && data && action === "update") {
+            setValidationRules(validation(null, data));
+        }
+    }, [data, isLoading, action]);
+
     const [validationRules, setValidationRules] = useState(() => validation(password, undefined))
-    const catalogues = useCatalogue()
+    const catalogues = useCatalogue(false)   
 
-    const { onSubmitHandler, loading } = useFormSubmit(async (formData: FormInputs) => {
-        const payload = UserPayloads(formData, images, selectedBox)
-        console.log("Payload: ", payload);
+    const [genders] = useState([
+        { id: 1, value: '1', label: 'Nam' },
+        { id: 2, value: '2', label: 'Nữ' },
+        { id: 3, value: '3', label: 'Khác' }
+    ])    
 
-        if (action === "update") {
-            await update(userId, payload)
-        }
-        else {
-            await create(payload)
-        }
+    const { onSubmitHandler, loading } = useFormSubmit(save, refetch, closeSheet, { action: action, id: userId })
+    const initialGenderRef = useRef<string | null>(null)
+    const initialCatalogueRef = useRef<string | null>(null)
+    const initialValuesRef = useRef<Partial<PayloadInputs> | null>(null)
+    
+    const [defaultSelectValue] = useState<Option | null>(null)
 
-    })
+    interface SelectBoxItem {
+        title: string | undefined,
+        placeholder: string | undefined,
+        options: Option[],
+        value: Option | null,
+        rules: object,
+        name: string,
+        control: any,
+        disabled: boolean,
+        errors: any,
+        onSelectedChange?: (value: string | undefined) => void,
+        isLoading?: boolean
+    }    
+
+    const initialSelectBoxs = useMemo<SelectBoxItem[]>(() => [
+        {
+            title: 'Giới tính (*)',
+            placeholder: 'Chọn giới tính',
+            errors: errors,
+            rules: {
+            required: 'Bạn cần chọn giới tính cho người dùng.',
+            },
+            name: 'gender',
+            value: defaultSelectValue,
+            control: control,
+            disabled: action === 'view',
+            options: genders,
+            onSelectedChange: (value?: string) => {
+                if (value !== undefined) {
+                    setValue('gender', value ? Number(value) as any : undefined, { shouldDirty: true, shouldValidate: true })
+                }
+            },
+        },
+        {
+            title: 'Nhóm người dùng (*)',
+            placeholder: 'Chọn nhóm người dùng',
+            errors: errors,
+            rules: {
+                required: 'Bạn cần chọn nhóm người dùng thuộc về.' 
+            },
+            name: 'userCatalogueId',
+            value: defaultSelectValue,
+            control: control,
+            disabled: action === 'view',
+            options: catalogues,
+            onSelectedChange: (value?: string) => {
+                if (value !== undefined) {
+                    setValue('userCatalogueId', value ? [Number(value)] as any : [], { shouldDirty: true, shouldValidate: true })
+                }
+            },
+        },
+    ], [genders, catalogues, defaultSelectValue, action, control, errors, isLoading])
+
+
+    const { selectBox, updateSelectedBoxValue, updateSelectedBoxOptions } = useSelectedBox(initialSelectBoxs)
 
     useEffect(() => {
-        if (!isLoading && data) {
-            const formValues: FormInputs = {
-                first_name: data.firstName,
-                middle_name: data.middleName,
-                last_name: data.lastName,
-                email: data.email,
-                phone: data.phone,
-                password: "",
-                confirm_password: "",
-                birth_date: data.birthDate ? data.birthDate.split("T")[0] : "",
-                gender: data.gender ? String(data.gender) : "",
-                catalogue: data.userCatalogueIds ? String(data.userCatalogueIds) : "",
-            }
-
-            reset(formValues) 
-            setValidationRules(validation(null, data))
+        if (!isLoading && data && (action === 'update' || action === 'view')) {
+            updateSelectedBoxOptions('gender', genders)
+            updateSelectedBoxOptions('userCatalogueId', catalogues)
+            updateSelectedBoxValue('gender', genders, String(data.gender))
+            updateSelectedBoxValue('userCatalogueId', catalogues, String(data.userCatalogueId))
+            initialGenderRef.current = String(data.gender)
+            initialCatalogueRef.current = String(data.userCatalogueId)
+            const mapped = mapUserToFormDefaults(data)
+            initialValuesRef.current = mapped
+            reset(mapped as any, { keepDirty: false, keepValues: false })
         }
-    }, [data, isLoading, reset])
+    }, [isLoading, data, action, genders, catalogues, reset])
 
-    const selectedBox = [
-        {
-            title: "Giới tính (*)",
-            placeholder: "Chọn giới tính",
-            errors: errors,
-            rules: {},
-            name: "gender",
-            control: control,
-            disabled: action === "view",
-            options: [
-                { id: 1, value: "male", label: "Nam" },
-                { id: 2, value: "female", label: "Nữ" },
-                { id: 3, value: "other", label: "Khác" },
-            ],
-        },
-        {
-            title: "Nhóm người dùng (*)",
-            placeholder: "Chọn nhóm người dùng",
-            errors: errors,
-            rules: {},
-            name: "catalogue",
-            control: control,
-            disabled: action === "view",
-            options:
-                catalogues?.filter((c) => c.id !== 0).map((c) => ({
-                id: c.id,
-                value: String(c.id),
-                label: c.name,
-                })) || [],
-        },
-    ]
+    useEffect(() => {
+        if (!isLoading) {
+            updateSelectedBoxOptions('gender', genders)
+        }
+    }, [isLoading, genders, action])
+
+    useEffect(() => {
+        if (!isLoading && catalogues) {
+            updateSelectedBoxOptions('userCatalogueId', catalogues)
+        }
+    }, [isLoading, catalogues, action])
+
+    const keysToCheck = ['lastName', 'middleName', 'firstName','email','phone','birthDate','gender','userCatalogueId']
+    const watched = watch(keysToCheck as any)
+    const areAllDifferent = useAllDifferent({ watchedValues: watched, getCurrentValues: () => getValues() as any, initialValues: (initialValuesRef.current as any) ?? null, keysToCheck: keysToCheck })
 
     return (
-        <form 
-                onSubmit={action === "view" ? undefined : handleSubmit(onSubmitHandler)} 
-                className="space-y-4"
-        >
+        <form onSubmit={action === "view" ? undefined : handleSubmit(onSubmitHandler)} className="space-y-4">
             <div className="grid gap-4 py-4">
                 {action !== "view" && (
                     <input
@@ -148,7 +191,7 @@ const UserStore = ({ userId, action }: UserStoreProps) => {
                     />
                 ))}
 
-                {selectedBox && selectedBox.map((item, index) => (
+                {selectBox && selectBox.map((item, index) => (
                     <CustomSelectBox 
                         key={index} 
                         register={register} 
@@ -158,7 +201,11 @@ const UserStore = ({ userId, action }: UserStoreProps) => {
 
                 {action !== "view" && (
                     <div className="text-center pt-30">
-                        <CustomButton loading={loading} text="Lưu thông tin" />
+                        <CustomButton 
+                            loading={loading} 
+                            text="Lưu thông tin" 
+                            disabled={action === 'update' ? !(areAllDifferent && isValid) : !isValid}
+                        />
                     </div>
                 )}
             </div>

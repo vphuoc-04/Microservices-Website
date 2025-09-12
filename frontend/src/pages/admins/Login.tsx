@@ -1,5 +1,4 @@
 import * as React from "react"
-import { useNavigate } from "react-router-dom";
 
 import { SubmitHandler, useForm } from "react-hook-form"
 
@@ -9,6 +8,7 @@ import { login } from "../../services/AuthService";
 // Redux
 import { useDispatch } from "react-redux";
 import { setToast } from "../../redux/slice/toastSlice";
+import { setAuthLogin } from "../../redux/slice/authSlice";
 
 import { Input } from "@/components/ui/input";
 import CustomButton from "@/components/admins/CustomButton";
@@ -19,7 +19,6 @@ type Inptus = {
 }
 
 const Login = () => {
-    const navigate = useNavigate();
     const dispatch = useDispatch();
     
     const { register, handleSubmit, setFocus, formState: { errors } } = useForm<Inptus>();
@@ -36,8 +35,12 @@ const Login = () => {
         try {
             const logged = await login(payload);
             if (logged) {
-                dispatch(setToast({ message: 'Login successfully', type: 'success' }));
-                navigate('/admin/dashboard');
+                const userStr = localStorage.getItem('user');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    dispatch(setAuthLogin(user));
+                    dispatch(setToast({ message: 'Đăng nhập thành công', type: 'success' }));
+                }
             }
         } catch (error) {
             console.log(error);

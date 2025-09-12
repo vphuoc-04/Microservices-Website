@@ -9,15 +9,16 @@ import {
   AlertDialogTitle
 } from "@/components/ui/alert-dialog"
 
-interface CustmAlertDialogProps {
-    isOpen: boolean,
-    title: string,
-    description: string,
-    closeAlertDialog: () => void,
-    confirmAction: () => void
-}
+import { CustomAlertDialogProps } from "@/interfaces/BaseServiceInterface"
 
-const CustomAlertDialog = ({isOpen, title, description, closeAlertDialog, confirmAction}: CustmAlertDialogProps) => {
+const CustomAlertDialog = ({
+    isOpen, 
+    title, 
+    description, 
+    closeAlertDialog, 
+    confirmAction,
+    isDialogLoading
+}: CustomAlertDialogProps) => {
     return (
         <AlertDialog open={isOpen}>
             <AlertDialogContent>
@@ -27,7 +28,10 @@ const CustomAlertDialog = ({isOpen, title, description, closeAlertDialog, confir
                     </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel onClick={closeAlertDialog}>Thoát</AlertDialogCancel>
-                    <AlertDialogAction onClick={confirmAction}>Tiếp tục</AlertDialogAction>
+                    <AlertDialogAction disabled={isDialogLoading} onClick={confirmAction}>
+                        {isDialogLoading ? <div className="spinner"></div> : null}
+                        {isDialogLoading ? 'Đang xử lý' : 'Thực hiện'}
+                    </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

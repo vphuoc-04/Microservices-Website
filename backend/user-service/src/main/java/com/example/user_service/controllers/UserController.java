@@ -53,6 +53,32 @@ public class UserController {
         this.userService = userService;
     }    
 
+    // @GetMapping("/me")
+    // @RequirePermission(action = "user:get_data")
+    // public ResponseEntity<?> getUser() {
+    //     String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+    //     Long id;
+    //     try {
+    //         id = Long.parseLong(userId);
+    //     } catch (NumberFormatException e) {
+    //         return ResponseEntity.status(401).body(ApiResource.message("Invalid user id in token", HttpStatus.UNAUTHORIZED));
+    //     }
+    //     UserDto userDto = userService.getUserById(id);
+    //     if (userDto == null) {
+    //         return ResponseEntity.notFound().build();
+    //     }
+    //     return ResponseEntity.ok(ApiResource.ok(userDto, "User found successfully"));
+    // }
+
+    // @GetMapping("/{id}")
+    // public ResponseEntity<?> getUserById(@PathVariable Long id) {
+    //     UserDto userDto = userService.getUserById(id);
+    //     if (userDto == null) {
+    //         return ResponseEntity.notFound().build();
+    //     }
+    //     return ResponseEntity.ok(ApiResource.ok(userDto, "User found successfully"));
+    // }
+
     @GetMapping("/me")
     @RequirePermission(action = "user:get_data")
     public ResponseEntity<?> getUser() {
@@ -63,21 +89,62 @@ public class UserController {
         } catch (NumberFormatException e) {
             return ResponseEntity.status(401).body(ApiResource.message("Invalid user id in token", HttpStatus.UNAUTHORIZED));
         }
-        UserDto userDto = userService.getUserById(id);
-        if (userDto == null) {
+        User user = userService.getUserById(id);
+        if (user == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(ApiResource.ok(userDto, "User found successfully"));
+
+        UserResource userResource = UserResource.builder()
+            .id(user.getId())
+            .publish(user.getPublish())
+            .firstName(user.getFirstName())
+            .middleName(user.getMiddleName())
+            .lastName(user.getLastName())
+            .email(user.getEmail())
+            .phone(user.getPhone())
+            .birthDate(
+                user.getBirthDate() != null 
+                    ? user.getBirthDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) 
+                    : null
+            )
+            .gender(user.getGender())
+            .userCatalogueId( 
+                user.getUserCatalogueUsers() != null ? 
+                user.getUserCatalogueUsers() .stream() .map(UserCatalogueUser::getUserCatalogueId) .collect(Collectors.toList()) : null )
+            .build();
+            
+        return ResponseEntity.ok(ApiResource.ok(userResource, "User found successfully"));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
-        UserDto userDto = userService.getUserById(id);
-        if (userDto == null) {
+        User user = userService.getUserById(id);
+        if (user == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(ApiResource.ok(userDto, "User found successfully"));
+
+        UserResource userResource = UserResource.builder()
+            .id(user.getId())
+            .publish(user.getPublish())
+            .firstName(user.getFirstName())
+            .middleName(user.getMiddleName())
+            .lastName(user.getLastName())
+            .email(user.getEmail())
+            .phone(user.getPhone())
+            .birthDate(
+                user.getBirthDate() != null 
+                    ? user.getBirthDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) 
+                    : null
+            )
+            .gender(user.getGender())
+            .userCatalogueId( 
+                user.getUserCatalogueUsers() != null ? 
+                user.getUserCatalogueUsers() .stream() .map(UserCatalogueUser::getUserCatalogueId) .collect(Collectors.toList()) : null )
+            .build();
+            
+        return ResponseEntity.ok(ApiResource.ok(userResource, "User found successfully"));
     }
+
 
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
@@ -143,7 +210,7 @@ public class UserController {
                         : null
                 )
                 .gender(user.getGender())
-                .userCatalogueIds( 
+                .userCatalogueId( 
                     user.getUserCatalogueUsers() != null ? 
                     user.getUserCatalogueUsers() .stream() .map(UserCatalogueUser::getUserCatalogueId) .collect(Collectors.toList()) : null )
                 .build()
@@ -230,7 +297,7 @@ public class UserController {
                         : null
                 )
                 .gender(user.getGender())
-                .userCatalogueIds(
+                .userCatalogueId(
                     user.getUserCatalogueUsers() != null ?
                         user.getUserCatalogueUsers()
                             .stream()
@@ -256,10 +323,7 @@ public class UserController {
     
     @PutMapping("/update/{id}")
     @RequirePermission(action = "users:update")
-    public ResponseEntity<?> update(
-            @PathVariable Long id,
-            @Valid @RequestBody UpdateRequest request,
-            @RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> update(@PathVariable Long id,@Valid @RequestBody UpdateRequest request, @RequestHeader("Authorization") String bearerToken) {
         try {
             String token = bearerToken.substring(7);
             String userId = jwtService.getUserIdFromJwt(token);
@@ -282,7 +346,7 @@ public class UserController {
                                     : null
                     )
                     .gender(user.getGender())
-                    .userCatalogueIds(
+                    .userCatalogueId(
                             user.getUserCatalogueUsers() != null ?
                                     user.getUserCatalogueUsers().stream()
                                             .map(UserCatalogueUser::getUserCatalogueId)
@@ -297,6 +361,7 @@ public class UserController {
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResource.message(e.getMessage(), HttpStatus.BAD_REQUEST));
+            
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 ApiResource.message("Cập nhật thất bại: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR)
@@ -330,7 +395,7 @@ public class UserController {
                                     : null
                     )
                     .gender(user.getGender())
-                    .userCatalogueIds(
+                    .userCatalogueId(
                             user.getUserCatalogueUsers() != null ?
                                     user.getUserCatalogueUsers().stream()
                                             .map(UserCatalogueUser::getUserCatalogueId)
