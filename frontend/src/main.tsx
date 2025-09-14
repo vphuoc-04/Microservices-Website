@@ -102,7 +102,13 @@ createRoot(document.getElementById('root')!).render(
             <AuthProvider>
                 <RouterProvider router={router} />
             </AuthProvider>
-            <ToastContainer position='top-right' />
+            <ToastContainer 
+                position='top-right'
+                autoClose={2000}
+                hideProgressBar={false}
+                closeOnClick={false}
+                pauseOnHover={false}
+            />
         </QueryClientProvider>
     </Provider>
 )

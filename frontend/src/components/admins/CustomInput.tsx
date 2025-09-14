@@ -28,7 +28,7 @@ const CustomInput = ({ label, name, type, errors, register, rules, defaultValue,
                     />
             </div>
             <div className="error-line text-right">
-                {errors[name] && <span className="text-red-500 text-[12px]">{errors[name].message}</span>}
+                {errors?.[name] && <span className="text-red-500 text-[12px]">{errors[name]?.message}</span>}
             </div>
         </>
     )

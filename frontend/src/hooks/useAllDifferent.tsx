@@ -4,7 +4,7 @@ interface UseAllDifferentProps {
     watchedValues: any
     getCurrentValues: () => Record<string, any>
     initialValues: Record<string, any> | null
-    keysToCheck: string[]
+    keysToCheck: readonly  string[]
 }
 
 const normalizeValue = (value: any) => {

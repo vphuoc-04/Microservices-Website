@@ -27,7 +27,7 @@ const PageHeading: React.FC<PageHeadingProps> = ({ breadcrumb }) => {
                                 {index > 0 && <BreadcrumbSeparator />}
                                 <UIBreadcrumbItem>
                                 {/* <Link to={item.route}>{item.title}</Link> */}
-                                <span>{item.title}</span>
+                                    <span>{item.title}</span>
                                 </UIBreadcrumbItem>
                             </React.Fragment>
                         ))}

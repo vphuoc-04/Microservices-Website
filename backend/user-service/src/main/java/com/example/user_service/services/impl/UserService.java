@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ import com.example.user_service.entities.UserCatalogueUser;
 import com.example.user_service.helpers.FilterParameter;
 import com.example.user_service.repositories.UserCatalogueUserRepository;
 import com.example.user_service.repositories.UserRepository;
+import com.example.user_service.requests.ChangePasswordRequest;
 import com.example.user_service.requests.StoreRequest;
 import com.example.user_service.requests.UpdatePublishRequest;
 import com.example.user_service.requests.UpdateRequest;
@@ -192,15 +194,21 @@ public class UserService extends BaseService implements UserServiceInterface, Us
 
     private UserDto convertToDto(User user) {
         com.example.common_lib.dtos.UserDto dto = new com.example.common_lib.dtos.UserDto();
-        dto.setId(user.getId());
-        dto.setFirstName(user.getFirstName());
-        dto.setMiddleName(user.getMiddleName());
-        dto.setLastName(user.getLastName());
-        dto.setEmail(user.getEmail());
-        dto.setPhone(user.getPhone());
-        dto.setImg(user.getImg());
-        dto.setCreatedAt(user.getCreatedAt());
-        dto.setUpdatedAt(user.getUpdatedAt());
+            dto.setId(user.getId());
+            dto.setFirstName(user.getFirstName());
+            dto.setMiddleName(user.getMiddleName());
+            dto.setLastName(user.getLastName());
+            dto.setEmail(user.getEmail());
+            dto.setPhone(user.getPhone());
+            dto.setImg(user.getImg());
+            dto.setUserCatalogueId(
+                user.getUserCatalogueUsers()
+                    .stream()
+                    .map(ucu -> (Long) ucu.getUserCatalogueId()) 
+                    .collect(Collectors.toList())
+            );
+            dto.setCreatedAt(user.getCreatedAt());
+            dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
     }
 
@@ -354,5 +362,24 @@ public class UserService extends BaseService implements UserServiceInterface, Us
 
         userCatalogueUserRepository.deleteByUserId(user.getId());
         userRepository.delete(user);
+    }
+
+    @Override
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        if (request.getOldPassword() != null && !request.getOldPassword().isEmpty()) {
+            if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+                throw new RuntimeException("Mật khẩu cũ không đúng");
+            }
+        }
+        
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("Mật khẩu nhập lại không khớp");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 }

@@ -1,5 +1,48 @@
 import { AxiosInstance } from "axios";
 
+interface Pagination<T = any> {
+  items: T[]
+  pagination: {
+    totalPages: number
+    totalElements: number
+    page: number
+    size: number
+    last: boolean
+  } | null
+}
+
+const basePagination = async (
+    instance: AxiosInstance, 
+    apiUrl: string, 
+    queryString: string,
+    transformData?: (data: any[]) => Promise<any[]> | any[]
+): Promise<Pagination> => {
+    try {
+        const response = await instance.get(`${apiUrl}/pagination?${queryString}`);
+        const pageData = response.data?.data;
+        
+        let items = pageData?.content || [];
+        
+        if (transformData) {
+            items = await Promise.resolve(transformData(items));
+        }
+
+        return {
+            items,
+            pagination: {                    
+                totalPages: pageData?.totalPages,
+                totalElements: pageData?.totalElements,
+                page: pageData?.number,
+                size: pageData?.size,
+                last: pageData?.last
+            }
+        };
+
+    } catch (error) {
+        return { items: [], pagination: null };
+    }
+};
+
 const baseSave = async (
     instance: AxiosInstance,
     apiUrl: string, 
@@ -68,6 +111,7 @@ const baseRemove =  async (instance: AxiosInstance, apiUrl: string, id: string) 
 
 export { 
     baseSave,
-    baseRemove
+    baseRemove,
+    basePagination
 }
 

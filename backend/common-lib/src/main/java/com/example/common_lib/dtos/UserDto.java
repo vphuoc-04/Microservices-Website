@@ -1,8 +1,10 @@
 package com.example.common_lib.dtos;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
@@ -22,7 +24,10 @@ public class UserDto {
     private String email;
     private String phone;
     private String img;
-    private LocalDateTime birthDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    private LocalDate birthDate;
+    
     private Integer gender;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

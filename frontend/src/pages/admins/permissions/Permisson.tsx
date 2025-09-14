@@ -1,113 +1,71 @@
-import { useEffect, useState } from "react";
-import { breadcrumb, getAllPermissions, createPermission, updatePermission, deletePermission, PermissionService } from "@/services/PermissionService";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+// Components
+import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card";
 import PageHeading from "@/components/admins/heading";
+import Paginate from "@/components/admins/paginate";
+import CustomTable from "@/components/admins/CustomTable";
+import Filter from "@/components/admins/Filter";
+import CustomSheet from "@/components/admins/CustomSheet";
+
+// Services
+import { pagination, remove } from "@/services/UserService";
+
+import { model } from "@/services/PermissionService";
 
 // Types
-import { Breadcrumb } from "@/types/Breadcrumb";
+import { BreadcrumbData } from "@/types/Breadcrumb";
+
+// Settings
+import { breadcrumb, tableColumn } from "@/settings/permission";
+
+// Hooks
+import useCheckBoxState from "@/hooks/useCheckBoxState";
+import useTable from "@/hooks/useTable";
+import useSheet from "@/hooks/useSheet";
 
 const Permission = () => {
-    const breadcrumbData: Breadcrumb[] = Array.isArray(breadcrumb) ? breadcrumb : [breadcrumb]
+    const breadcrumbData: BreadcrumbData = breadcrumb
 
-    const [permissions, setPermissions] = useState<PermissionService[]>([]);
-    const [name, setName] = useState("");
-    const [publish, setPublish] = useState(1);
-    const [description, setDescription] = useState("");
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const { isLoading, data, isError, refetch, buildLinks, handlePageChange, handleQueryString } = useTable({model, pagination})
+    const { checkedState, checkedAllState, handleCheckedChange, handleCheckedAllChange, isAnyChecked } = useCheckBoxState(data, model, isLoading);
+    const anyChecked = isAnyChecked();
 
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const fetchData = async () => {
-        const data = await getAllPermissions();
-        setPermissions(data);
-    };
-
-    const handleCreateOrUpdate = async () => {
-        if (!name.trim()) return;
-        let success = false;
-        if (editingId !== null) {
-            success = await updatePermission(editingId, name, publish, description);
-            setEditingId(null);
-        } else {
-            success = await createPermission(name, publish, description);
-        }
-        if (success) {
-            setName("");
-            setPublish(1);
-            setDescription("");
-            fetchData();
-        }
-    };
-
-    const handleEdit = (permission: PermissionService) => {
-        setEditingId(permission.id);
-        setName(permission.name);
-        setPublish(permission.publish);
-        setDescription(permission.description || "");
-    };
-
-    const handleDelete = async (id: number) => {
-        const success = await deletePermission(id);
-        if (success) {
-            setPermissions(permissions.filter(p => p.id !== id));
-        }
-    };
+    const { isSheetOpen, openSheet, closeSheet } = useSheet();
 
     return (
         <>
-            <PageHeading breadcrumb={breadcrumbData} />
+            <PageHeading breadcrumb={breadcrumbData.items} />
             <div className="container p-3">
                 <Card>
+                    <CardHeader>
+                        <CardTitle className="uppercase">{breadcrumb.page.title}</CardTitle>
+                        <CardDescription className="text-[#f00000]">{breadcrumb.page.description}</CardDescription>
+                    </CardHeader>
                     <CardContent>
-                        <div className="flex gap-2 mb-4">
-                            <Input value={name} onChange={e => setName(e.target.value)} placeholder="Permission name..." />
-                            <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Description..." />
-                            <select value={publish} onChange={e => setPublish(Number(e.target.value))} className="border rounded px-2">
-                                <option value={1}>Active</option>
-                                <option value={0}>Inactive</option>
-                                <option value={2}>Archived</option>
-                            </select>
-                            <Button className="text-white bg-teal-500" onClick={handleCreateOrUpdate}>
-                                {editingId !== null ? "Update" : "Create"}
-                            </Button>
-                        </div>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>ID</TableHead>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {permissions.length > 0 ? permissions.map(permission => (
-                                    <TableRow key={permission.id}>
-                                        <TableCell>{permission.id}</TableCell>
-                                        <TableCell>{permission.name}</TableCell>
-                                        <TableCell>{permission.description}</TableCell>
-                                        <TableCell>{permission.publish === 1 ? "Active" : permission.publish === 0 ? "Inactive" : "Archived"}</TableCell>
-                                        <TableCell>
-                                            <Button variant="outline" size="sm" onClick={() => handleEdit(permission)}>Edit</Button>
-                                            <Button variant="outline" size="sm" className="text-red-500 border-red-500 ml-2" onClick={() => handleDelete(permission.id)}>Delete</Button>
-                                        </TableCell>
-                                    </TableRow>
-                                )) : (
-                                    <TableRow>
-                                        <TableCell colSpan={5} className="text-center">No data</TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
+                        <Filter 
+                            isAnyChecked={anyChecked} 
+                            checkedState={checkedState} 
+                            model={model} 
+                            refetch={refetch} 
+                            handleQueryString={(filters: any) => handleQueryString(filters)}
+                            openSheet={openSheet}
+                        />
+                        <CustomTable 
+                            isLoading={isLoading}
+                            data={data}
+                            isError={isError}
+                            model={model}
+                            tableColumn={tableColumn}
+                            checkedState={checkedState}
+                            checkedAllState={checkedAllState}
+                            handleCheckedChange={handleCheckedChange}
+                            handleCheckedAllChange={handleCheckedAllChange}
+                            openSheet={openSheet}
+                            remove={remove}
+                            refetch={refetch}
+                        />
                     </CardContent>
                     <CardFooter>
-                        <p>Permission management</p>
+                        <Paginate links={buildLinks(data?.pagination)} onPageChange={handlePageChange} />
                     </CardFooter>
                 </Card>
             </div>

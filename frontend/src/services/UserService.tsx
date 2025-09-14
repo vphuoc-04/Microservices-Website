@@ -13,7 +13,7 @@ import { UpdateStatusByFieldParam } from '@/interfaces/BaseServiceInterface';
 // Services
 import { fetchUserCatalogue } from './UserCatalogueService';
 
-import { baseRemove, baseSave } from './BaseService';
+import { basePagination, baseRemove, baseSave } from './BaseService';
 
 const model = 'users';
 
@@ -23,37 +23,25 @@ const me = async(): Promise<User | null> => {
         return response.data.data
 
     } catch (error) {
-        handleAxiosError(error)
         return null
     }
 }
 
 const pagination = async (queryString: string) => {
-    try {
-        const response = await userServiceInstance.get(`/users/get_all_user?${queryString}`);
-        const pageData = response.data?.data;
-
-        const catalogues = await fetchUserCatalogue();
-        const catalogueMap = new Map(catalogues.map(c => [c.id, c.name]));
-        
-        return {
-            users: (pageData?.content || []).map((u: any) => ({
-                ...u,
-                userCatalogueId: u.userCatalogueId?.[0] || 0,
-                userCatalogueName: catalogueMap.get(u.userCatalogueId?.[0]) || "Không có nhóm"
-            })),
-            pagination: {                    
-                totalPages: pageData?.totalPages,
-                totalElements: pageData?.totalElements,
-                page: pageData?.number,
-                size: pageData?.size,
-                last: pageData?.last
-            }
-        };
-    } catch (error) {
-        handleAxiosError(error)
-        return { users: [], pagination: null };
-    }
+    return basePagination(userServiceInstance, model, queryString, async (users: any[]) => {
+            const catalogues = await fetchUserCatalogue();
+            const catalogueMap = new Map(catalogues.map(c => [c.id, c.name]));
+            
+            return users.map(user => ({
+                ...user,
+                userCatalogueId: user.userCatalogueId?.[0] || 0,
+                userCatalogueName: catalogueMap.get(user.userCatalogueId?.[0]) || "Không có nhóm"
+            }));
+        }
+    ).then(result => ({
+        users: result.items,
+        pagination: result.pagination
+    }));
 };
 
 const deleteMany = async (ids: number[]) => {
@@ -124,6 +112,21 @@ const view = async (id: number) => {
     }
 };
 
+const changePassword = async (id: string, payload: { newPassword: string, confirmPassword: string }) => {
+    console.log(id, payload);
+    
+    try {
+        const response = await userServiceInstance.put(`/${model}/${id}/change-password`, {
+            newPassword: payload.newPassword,
+            confirmPassword: payload.confirmPassword
+        })
+
+        return response.data
+    } catch (error) {
+        throw error;
+    }
+}
+
 export { 
     model,
     me, 
@@ -134,5 +137,6 @@ export {
     save,
     getUserById,
     view,
-    remove
+    remove,
+    changePassword
 };

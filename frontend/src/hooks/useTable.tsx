@@ -20,7 +20,7 @@ const useTable = ({model, pagination}: UseTableProps) => {
     const [filters, setFilters] = useState<FilterParams>({})
     const [loading, setLoading] = useState(false);
     const [shouldShowLoading, setShouldShowLoading] = useState(false);
-    const { isLoading, isFetching, data, isError, refetch } = useQuery(['users', queryString], () => pagination(queryString),{ 
+    const { isLoading, isFetching, data, isError, refetch } = useQuery([model, queryString], () => pagination(queryString),{ 
         keepPreviousData: true,
         refetchOnWindowFocus: false,
     });

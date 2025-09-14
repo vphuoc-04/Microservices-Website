@@ -1,5 +1,5 @@
 // Services
-import { model, pagination, remove } from "@/services/UserService";
+import { model, pagination, remove, changePassword } from "@/services/UserService";
 
 // Settings
 import { breadcrumb, tableColumn } from "@/settings/user";
@@ -18,6 +18,7 @@ import PageHeading from "@/components/admins/heading";
 import CustomTable from "@/components/admins/CustomTable";
 import Paginate from "@/components/admins/paginate";
 import Filter from "@/components/admins/Filter";
+import CustomSheet from "@/components/admins/CustomSheet";
 
 // Types
 import { BreadcrumbData } from "@/types/Breadcrumb";
@@ -26,9 +27,8 @@ import { BreadcrumbData } from "@/types/Breadcrumb";
 import useCheckBoxState from "@/hooks/useCheckBoxState";
 import useTable from "@/hooks/useTable";
 import useSheet from "@/hooks/useSheet";
-import CustomSheet from "@/components/admins/CustomSheet";
+import UserStore from "./includes/Store";
 
-import UserStore from "./Store";
 
 const User = ({}) => {
     const breadcrumbData: BreadcrumbData = breadcrumb
@@ -44,8 +44,8 @@ const User = ({}) => {
             <div className="container p-3">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="uppercase">{breadcrumb.page.title}</CardTitle>
-                        <CardDescription className="text-[#f00000]">{breadcrumb.page.description}</CardDescription>
+                        <CardTitle >{breadcrumb.page.title}</CardTitle>
+                        <CardDescription className = {breadcrumb.page.desStyle}>{breadcrumb.page.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Filter 
@@ -68,6 +68,7 @@ const User = ({}) => {
                             handleCheckedAllChange={handleCheckedAllChange}
                             openSheet={openSheet}
                             remove={remove}
+                            changePassword={changePassword}
                             refetch={refetch}
                         />
                     </CardContent>

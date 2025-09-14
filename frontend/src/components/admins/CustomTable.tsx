@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 // Components
 import { 
@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import CustomAlertDialog from "@/components/admins/CustomAlertDialog";
+import CustomDialog from "@/components/admins/CustomDialog";
 
 // Hooks
 import useColumnState from "@/hooks/useColumnState";
@@ -23,7 +24,6 @@ import { buttonActions, ParamsToTuple, Row } from "@/settings/user";
 
 // Interfaces
 import { CustomTableProps } from "@/interfaces/BaseServiceInterface";
-
 
 const CustomTable = ({ 
     isLoading, 
@@ -37,13 +37,23 @@ const CustomTable = ({
     handleCheckedAllChange,
     openSheet,
     remove,
-    refetch
+    changePassword,
+    refetch,
+    ...restProps
 } : CustomTableProps) => {
     const { columnState, handleChecked, setInitialColumnState } = useColumnState();
     const { alertDialogOpen, openAlertDialog, closeAlertDialog, confirmAction, isLoading: isDialogLoading } = useDialog(refetch);
 
-    const handleAlertDialog = (id: string, callback: (id: number) => Promise<any>) => {
+    const [DialogComponent, setDialogComponent] = useState<React.ComponentType<any> | null>(null)
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+
+    const handleAlertDialog = (id: string, callback: any) => {
         openAlertDialog(id, callback) 
+    }
+
+    const handleDialog = (id: string, callback: Function, Component: React.ComponentType<any>) => {
+        setDialogComponent(() => (props: any) => <Component id={id} callback={callback} close={() => setIsDialogOpen(false)} {...props} />)
+        setIsDialogOpen(true)
     }
 
     useEffect(() => {
@@ -123,11 +133,25 @@ const CustomTable = ({
                                                 action.onClick && action.params ? (e: React.
                                                 MouseEvent<HTMLButtonElement>) => {
                                                     const args = action.params?.map(param =>{
-                                                        if (typeof param === 'string' && param.endsWith(':f')) {
-                                                            return eval(param.slice(0, -2))
+                                                        if (typeof param === 'string' && (param.endsWith
+                                                        (':f') || param.endsWith(':pf') || param.endsWith
+                                                        (':c'))){
+                                                            if (param.endsWith(':f')) {
+                                                                return eval(param.slice(0, -2))
+
+                                                            } else if (param.endsWith(':f')) {
+                                                                const functionName = param.slice(0, -2)
+                                                                return restProps?.[functionName]
+                                                            
+                                                            } else if (param.endsWith(':c')) {
+                                                                return action.component;
+
+                                                            }
+
                                                         } else {
                                                             return row[param as keyof Row]
                                                         }
+
                                                     }) as ParamsToTuple<typeof action.params>
                                                     
                                                     if (action.onClick) {
@@ -154,6 +178,17 @@ const CustomTable = ({
                 confirmAction={() => confirmAction()}
                 isDialogLoading={isDialogLoading}
             />
+
+            {isDialogOpen && DialogComponent &&(
+                <CustomDialog 
+                    title="Khôi phục mật khẩu"
+                    description="Tính năng này cho phép thay đổi mật khẩu của người dùng."
+                    open={isDialogOpen}
+                    close={() => setIsDialogOpen(false)}
+                >
+                    {React.createElement(DialogComponent as React.ComponentType<any>)}
+                </CustomDialog>
+            )}
         </>
     )
 }

@@ -7,6 +7,7 @@ import { handleAxiosError } from "../helpers/axiosHelper";
 // Types
 import { UserCatalogue } from "../types/UserCatalogue";
 
+const model = 'user_catalogue';
 
 const fetchUserCatalogue = async(): Promise<UserCatalogue[]> => {
     try {
@@ -86,7 +87,7 @@ const updateUserCatalogue = async(id: number, name: string, publish: string): Pr
     }
 }
 
-const deleteUserCatalogue = async (id: number): Promise<boolean> => {
+const deleteUserCatalogue = async (id: string): Promise<boolean> => {
     try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -106,21 +107,10 @@ const deleteUserCatalogue = async (id: number): Promise<boolean> => {
     }
 };
 
-const breadcrumb = [
-  {
-    title: "User",
-    route: ""
-  },
-  {
-    title: "Quản lý nhóm người dùng",
-    route: "/admin/user/catalogue"
-  }
-]
-
 export { 
+    model,
     fetchUserCatalogue,
     createUserCatalogue,
     updateUserCatalogue,
     deleteUserCatalogue,
-    breadcrumb
 }

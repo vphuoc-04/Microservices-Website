@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.common_lib.dtos.UserDto;
 import com.example.user_service.entities.User;
+import com.example.user_service.requests.ChangePasswordRequest;
 import com.example.user_service.requests.StoreRequest;
 import com.example.user_service.requests.UpdatePublishRequest;
 import com.example.user_service.requests.UpdateRequest;
@@ -31,4 +32,5 @@ public interface UserServiceInterface {
     User update(Long id, UpdateRequest request, Long editedBy);
     User view(Long id);
     void delete(Long id, Long deletedBy);
+    void changePassword(Long userId, ChangePasswordRequest request);
 }

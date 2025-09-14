@@ -8,6 +8,7 @@ const useDialog = (
 ) => {
     const [alertDialogOpen, setAlertDialogOpen] = useState<boolean>(false)
     const [currentAction, setCurrentAction] = useState<{ id: string; callback: Function } | null>(null)
+    const [loading, setLoading] = useState<boolean>(false)
 
     const openAlertDialog = useCallback((id: string, callback: Function) => {
         setCurrentAction({ id, callback })
@@ -42,7 +43,12 @@ const useDialog = (
 
     const confirmAction = useCallback(() => {
         if (currentAction) {
-            mutation.mutate(Number(currentAction.id))
+            setLoading(true)
+
+            setTimeout(() => {
+                mutation.mutate(Number(currentAction.id))
+                setLoading(false)
+            }, 2000)
         }
     }, [currentAction])
 
@@ -52,7 +58,7 @@ const useDialog = (
         closeAlertDialog,
         confirmAction,
         setCurrentAction,
-        isLoading: mutation.isLoading,
+        isLoading: loading || mutation.isLoading,
     }
 }
 

@@ -27,6 +27,7 @@ import com.example.common_lib.services.JwtService;
 import com.example.user_service.entities.User;
 import com.example.user_service.entities.UserCatalogueUser;
 import com.example.user_service.repositories.UserRepository;
+import com.example.user_service.requests.ChangePasswordRequest;
 import com.example.user_service.requests.StoreRequest;
 import com.example.user_service.requests.UpdatePublishRequest;
 import com.example.user_service.requests.UpdateRequest;
@@ -188,7 +189,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/get_all_user")
+    @GetMapping("/pagination")
     @RequirePermission(action = "users:get_all_user")
     public ResponseEntity<?> getAllUsers(HttpServletRequest request) {
         Map<String, String[]> parameters = request.getParameterMap();
@@ -437,6 +438,22 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResource.message("Xóa thất bại: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
+    @PutMapping("/{id}/change-password")
+    public ResponseEntity<?> changePassword(@PathVariable("id") Long userId,@Valid @RequestBody ChangePasswordRequest request) {
+        try {
+            userService.changePassword(userId, request);
+
+            ApiResource<String> response = ApiResource.ok("success", "Đổi mật khẩu thành công!");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResource.message(e.getMessage(), HttpStatus.BAD_REQUEST));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResource.message(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
 }

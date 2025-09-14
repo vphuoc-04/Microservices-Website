@@ -6,7 +6,7 @@ export const sidebarItem = [
         items: [
             {
                 icons: <FaChartPie />,
-                label: 'Dashboard',
+                label: 'Tổng Quan',
                 active: ['dashboard'],
                 to: '/admin/dashboard',
                 links: [
@@ -21,19 +21,20 @@ export const sidebarItem = [
         items: [
             {
                 icons: <FaUser />,
-                label: 'User',
+                label: 'Người Dùng',
                 active: ['user'],
                 links: [
-                    { title: 'User management', to: '/admin/user/users' },
-                    { title: 'User cataloge management', to: '/admin/user/catalogue' }
+                    { title: 'Quản lý người dùng', to: '/admin/user/users' },
+                    { title: 'Quản lý nhóm người dùng', to: '/admin/user/catalogue' }
                 ]
             },
             {
                 icons: <FaFingerprint />,
-                label: 'Permission',
+                label: 'Phân Quyền',
                 active: ['permission'],
+                to: '/admin/permission/permissions',
                 links: [
-                    { title: 'Permission management', to: '/admin/permission/permissions' }
+                    //{ title: 'Quản lý phân quyền', to: '/admin/permission/permissions' }
                 ]
             }
         ]

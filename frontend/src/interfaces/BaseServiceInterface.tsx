@@ -44,7 +44,10 @@ export interface CustomTableProps extends SheetProps {
     handleCheckedChange: (id: number) => void
     handleCheckedAllChange: () => void,
     remove: (id: string) => Promise<any>,
-    refetch: any
+    changePassword: (id: string, payload: { newPassword: string, confirmPassword: string }) => Promise<any>,
+    refetch: any,
+    [key: string]: any   
+    restProps?: Record<string, any>
 }
 
 export interface SelectBoxItem {

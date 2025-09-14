@@ -3,6 +3,8 @@ import { permissionServiceInstance } from '../configs/axios';
 // Helpers
 import { handleAxiosError } from "../helpers/axiosHelper";
 
+const model = 'permissions';
+
 export interface PermissionService {
     id: number;
     name: string;
@@ -94,19 +96,8 @@ export const getPermissionById = async (id: number): Promise<PermissionService |
     }
 };
 
-const breadcrumb = [
-  {
-    title: "Permission",
-    route: ""
-  },
-  {
-    title: "Quản lý quyền hạn",
-    route: "/admin/permission/permissions"
-  }
-]
-
 
 export {
-    breadcrumb,
+    model,
     getAllPermissions
 };

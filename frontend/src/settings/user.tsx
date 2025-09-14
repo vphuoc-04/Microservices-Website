@@ -1,9 +1,9 @@
 import React, { JSX } from 'react';
-import { FaEdit, FaRegTrashAlt, FaSearch } from "react-icons/fa";
+import { FaEdit, FaRegTrashAlt, FaSearch, FaRedo } from "react-icons/fa";
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 
 // Types
-import { PayloadInputs, User } from "@/types/User";
+import { User } from "@/types/User";
 
 // Constants
 import { genders } from '@/constants/generals';
@@ -11,20 +11,24 @@ import { genders } from '@/constants/generals';
 // Hooks
 import { Sheet } from '@/hooks/useSheet';
 
+// Components
+import Recovery from '@/pages/admins/users/catalogue/includes/Recovery';
+
 const breadcrumb = {
     items: [
         {
-            title: "User",
+            title: "Người Dùng",
             route: ""
         },
         {
-            title: "Quản lý người dùng",
+            title: "Quản Lý Người Dùng",
             route: "/admin/user/users"
         }
     ],
     page: {
         title: "QUẢN LÝ DANH SÁCH NGƯỜI DÙNG",
-        description: "Hiển thị danh sách thành viên, sử dụng các chức năng bên dưới để lọc theo mong muốn"
+        description: "Hiển thị danh sách thành viên, sử dụng các chức năng bên dưới để lọc theo mong muốn.",
+        desStyle: 'text-teal-600'
     },
     create: {
         title: "THÊM MỚI NGƯỜI DÙNG",
@@ -99,10 +103,11 @@ const tableColumn: tableColumn[] = [
 
 export type Row = Record<string, any>
 export type OpenSheetFunction = (sheet: Sheet) => void
-export type ActionParam = keyof Row | `${string}:f`
+export type ActionParam = keyof Row | `${string}:f` | `${string}:c`
 
 export type ParamToType<T extends ActionParam> =
     T extends `${string}:f` ? Function :
+    T extends `${string}:c` ? React.ComponentType<any> :
     T extends keyof Row ? Row[T] : never;
 
 export type ParamsToTuple<T extends ActionParam[]> = {
@@ -115,7 +120,8 @@ export interface ButtonAction<T extends ActionParam[]>{
     className?: string,
     icon?: React.ReactNode,
     path?: string,
-    method?: string
+    method?: string,
+    component?: React.ComponentType<any>
 }
 
 const buttonActions: ButtonAction<ActionParam[]>[] = [
@@ -142,11 +148,22 @@ const buttonActions: ButtonAction<ActionParam[]>[] = [
     {
         path: '/users/view',
         icon: <FaSearch className='text-white'/>,
-        className: 'bg-[#f8ac59]',
+        className: 'bg-[#f8ac59] mr-[10px]',
         method: 'view',
         params: ['id', 'openSheet:f'],
         onClick: (id: string, openSheet: OpenSheetFunction) => {
             openSheet({ open: true, action: 'view', id: id })
+        }
+    },
+    {
+        path: '/users/recovery',
+        icon: <FaRedo className='text-white'/>,
+        className: 'bg-[#1e9dc7]',
+        method: 'change-password',
+        params: ['id', 'handleDialog:f', 'changePassword:f', 'Recovery:c'],
+        component: Recovery, 
+        onClick: (id: string, handleDialog: Function, changePassword: Function, Recovery: React.ComponentType<any>) => {
+            handleDialog(id, changePassword, Recovery)
         }
     }
 ]

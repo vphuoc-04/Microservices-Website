@@ -4,6 +4,9 @@ import { useQuery } from "react-query"
 
 import { AvatarFallback } from "@radix-ui/react-avatar"
 
+// Constants
+import { USER_KEYS_TO_CHECK } from "@/constants/formkey"
+
 // Components
 import CustomSelectBox, { Option } from "@/components/admins/CustomSelectBox"
 import CustomInput from "@/components/admins/CustomInput"
@@ -23,6 +26,9 @@ import useAllDifferent from "@/hooks/useAllDifferent"
 // Types
 import { PayloadInputs, User } from "@/types/User"
 import { validation, mapUserToFormDefaults } from "@/validations/user/StoreUserValidation"
+
+// Interfaces
+import { SelectBoxItem } from "@/interfaces/BaseServiceInterface"
 
 
 interface UserStoreProps {
@@ -61,26 +67,9 @@ const UserStore = ({ userId, action, refetch, closeSheet }: UserStoreProps) => {
     ])    
 
     const { onSubmitHandler, loading } = useFormSubmit(save, refetch, closeSheet, { action: action, id: userId })
-    const initialGenderRef = useRef<string | null>(null)
-    const initialCatalogueRef = useRef<string | null>(null)
     const initialValuesRef = useRef<Partial<PayloadInputs> | null>(null)
     
     const [defaultSelectValue] = useState<Option | null>(null)
-
-    interface SelectBoxItem {
-        title: string | undefined,
-        placeholder: string | undefined,
-        options: Option[],
-        value: Option | null,
-        rules: object,
-        name: string,
-        control: any,
-        disabled: boolean,
-        errors: any,
-        onSelectedChange?: (value: string | undefined) => void,
-        isLoading?: boolean
-    }    
-
     const initialSelectBoxs = useMemo<SelectBoxItem[]>(() => [
         {
             title: 'Giới tính (*)',
@@ -127,13 +116,13 @@ const UserStore = ({ userId, action, refetch, closeSheet }: UserStoreProps) => {
         if (!isLoading && data && (action === 'update' || action === 'view')) {
             updateSelectedBoxOptions('gender', genders)
             updateSelectedBoxOptions('userCatalogueId', catalogues)
+
             updateSelectedBoxValue('gender', genders, String(data.gender))
             updateSelectedBoxValue('userCatalogueId', catalogues, String(data.userCatalogueId))
-            initialGenderRef.current = String(data.gender)
-            initialCatalogueRef.current = String(data.userCatalogueId)
+
             const mapped = mapUserToFormDefaults(data)
             initialValuesRef.current = mapped
-            reset(mapped as any, { keepDirty: false, keepValues: false })
+            reset(mapped, { keepDirty: false })
         }
     }, [isLoading, data, action, genders, catalogues, reset])
 
@@ -149,9 +138,13 @@ const UserStore = ({ userId, action, refetch, closeSheet }: UserStoreProps) => {
         }
     }, [isLoading, catalogues, action])
 
-    const keysToCheck = ['lastName', 'middleName', 'firstName','email','phone','birthDate','gender','userCatalogueId']
-    const watched = watch(keysToCheck as any)
-    const areAllDifferent = useAllDifferent({ watchedValues: watched, getCurrentValues: () => getValues() as any, initialValues: (initialValuesRef.current as any) ?? null, keysToCheck: keysToCheck })
+    const watched = watch(USER_KEYS_TO_CHECK)
+    const areAllDifferent = useAllDifferent({
+        watchedValues: watched,
+        getCurrentValues: getValues,
+        initialValues: initialValuesRef.current,
+        keysToCheck: USER_KEYS_TO_CHECK
+    })
 
     return (
         <form onSubmit={action === "view" ? undefined : handleSubmit(onSubmitHandler)} className="space-y-4">
