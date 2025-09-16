@@ -26,6 +26,8 @@ import useAllDifferent from "@/hooks/useAllDifferent"
 // Types
 import { PayloadInputs, User } from "@/types/User"
 import { validation, mapUserToFormDefaults } from "@/validations/user/StoreUserValidation"
+import { uploadService } from "@/services/UploadService"
+import { serviceConfig } from "@/configs/axios"
 
 // Interfaces
 import { SelectBoxItem } from "@/interfaces/BaseServiceInterface"
@@ -153,7 +155,12 @@ const UserStore = ({ userId, action, refetch, closeSheet }: UserStoreProps) => {
                     <input
                         type="file"
                         accept="image/*"
-                        onChange={handleImageChange}
+                        onChange={(e) => {
+                            handleImageChange(e)
+                            if (e.target.files && e.target.files[0]) {
+                                setValue('img' as any, e.target.files[0] as any, { shouldDirty: true, shouldValidate: false })
+                            }
+                        }}
                         id="upload-image"
                         className="hidden"
                     />
@@ -166,7 +173,7 @@ const UserStore = ({ userId, action, refetch, closeSheet }: UserStoreProps) => {
                             src={
                             images.length > 0
                                 ? images[0].preview
-                                : "https://github.com/shadcn.png"
+                                : (data?.imgId ? uploadService.createDownloadUrlById(data.imgId as number) : "https://github.com/shadcn.png")
                             }
                         />
                         <AvatarFallback>CN</AvatarFallback>

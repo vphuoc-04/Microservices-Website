@@ -30,7 +30,7 @@ public class UpdateRequest {
     @NotBlank(message = "Phone cannot be empty")
     private String phone;
 
-    private String img;
+    private Long imgId;
 
     @NotNull(message = "Birth date cannot be empty")
     private LocalDateTime birthDate;

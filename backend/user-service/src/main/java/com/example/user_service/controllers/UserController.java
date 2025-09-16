@@ -24,6 +24,7 @@ import com.example.common_lib.annotations.RequirePermission;
 import com.example.common_lib.dtos.UserDto;
 import com.example.common_lib.resources.ApiResource;
 import com.example.common_lib.services.JwtService;
+import com.example.user_service.clients.FileClient;
 import com.example.user_service.entities.User;
 import com.example.user_service.entities.UserCatalogueUser;
 import com.example.user_service.repositories.UserRepository;
@@ -47,6 +48,9 @@ public class UserController {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private FileClient fileClient;
 
     public UserController (
         UserServiceInterface userService
@@ -97,6 +101,8 @@ public class UserController {
 
         UserResource userResource = UserResource.builder()
             .id(user.getId())
+            .imgId(user.getImgId())
+            .imgUrl(fileClient.buildDownloadUrlById(user.getImgId()))
             .publish(user.getPublish())
             .firstName(user.getFirstName())
             .middleName(user.getMiddleName())
@@ -126,6 +132,8 @@ public class UserController {
 
         UserResource userResource = UserResource.builder()
             .id(user.getId())
+            .imgId(user.getImgId())
+            .imgUrl(fileClient.buildDownloadUrlById(user.getImgId()))
             .publish(user.getPublish())
             .firstName(user.getFirstName())
             .middleName(user.getMiddleName())
@@ -199,6 +207,8 @@ public class UserController {
         Page<UserResource> userResource = users.map(user -> 
             UserResource.builder()
                 .id(user.getId())
+                .imgId(user.getImgId())
+                .imgUrl(fileClient.buildDownloadUrlById(user.getImgId()))
                 .publish(user.getPublish())
                 .firstName(user.getFirstName())
                 .middleName(user.getMiddleName())
@@ -230,14 +240,24 @@ public class UserController {
     }
 
     @DeleteMapping("/delete_many")
-    public ResponseEntity<?> deleteMany(@RequestBody List<Long> ids) {
+    public ResponseEntity<?> deleteMany(@RequestBody List<Long> ids, @RequestHeader(value = "Authorization", required = false) String bearerToken) {
         if (ids == null || ids.isEmpty()) {
             return ResponseEntity.badRequest()
                 .body(ApiResource.message("List of ids cannot be empty", HttpStatus.BAD_REQUEST));
         }
+        // Fetch imgIds first
+        List<User> users = userRepository.findAllById(ids);
+        List<Long> imgIds = users.stream()
+            .map(User::getImgId)
+            .filter(java.util.Objects::nonNull)
+            .toList();
 
         boolean success = userService.deleteMany(ids);
         if (success) {
+            // cascade delete images
+            if (bearerToken != null) {
+                imgIds.forEach(imgId -> fileClient.deleteFilePermanently(imgId, bearerToken));
+            }
             return ResponseEntity.ok(ApiResource.ok(ids, "Deleted users successfully!"));
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -286,6 +306,7 @@ public class UserController {
 
             UserResource userResource = UserResource.builder()
                 .id(user.getId())
+                .imgId(user.getImgId())
                 .publish(user.getPublish())
                 .firstName(user.getFirstName())
                 .middleName(user.getMiddleName())
@@ -334,7 +355,7 @@ public class UserController {
 
             UserResource userResource = UserResource.builder()
                     .id(user.getId())
-                    .img(user.getImg())
+                    .imgId(user.getImgId())
                     .publish(user.getPublish())
                     .firstName(user.getFirstName())
                     .middleName(user.getMiddleName())
@@ -383,7 +404,7 @@ public class UserController {
 
             UserResource userResource = UserResource.builder()
                     .id(user.getId())
-                    .img(user.getImg())
+                    .imgId(user.getImgId())
                     .publish(user.getPublish())
                     .firstName(user.getFirstName())
                     .middleName(user.getMiddleName())
@@ -427,7 +448,16 @@ public class UserController {
             String userId = jwtService.getUserIdFromJwt(token);
             Long deletedBy = Long.valueOf(userId);
 
+            // Fetch user before delete to get imgId
+            User user = userService.getUserById(id);
+            Long imgId = user != null ? user.getImgId() : null;
+
             userService.delete(id, deletedBy);
+
+            // Cascade delete image in upload-service
+            if (imgId != null) {
+                fileClient.deleteFilePermanently(imgId, bearerToken);
+            }
 
             ApiResource<String> response = ApiResource.ok("Xóa người dùng thành công", "Người dùng đã được xóa");
             return ResponseEntity.ok(response);

@@ -1,4 +1,5 @@
 import { AxiosInstance } from "axios";
+import { uploadService } from "./UploadService";
 
 interface Pagination<T = any> {
   items: T[]
@@ -52,23 +53,40 @@ const baseSave = async (
     const body: Record<string, any> = {}
     const keys = Object.keys(payload) as Array<keyof typeof payload>
 
-    keys.forEach((key) => {
+    // Handle fields including potential file upload for avatar image
+    for (const key of keys) {
         const value = payload[key]
+
+        // Special handling for single file image field like 'img'
+        if (value instanceof File) {
+            // Upload the file and send only file id to backend
+            const uploaded = await uploadService.uploadSingleFile(value, 'avatar', undefined, true)
+            body.imgId = uploaded.id
+            continue
+        }
+
         if (value instanceof FileList) {
-            
+            // If ever needed, take the first file as a single image
+            const first = value.item(0)
+            if (first) {
+                const uploaded = await uploadService.uploadSingleFile(first, 'avatar', undefined, true)
+                body.imgId = uploaded.id
+            }
+            continue
+        }
 
-        } else if (value instanceof File) {
-
-
-        } else if (Array.isArray(value)) {
+        if (Array.isArray(value)) {
             value.forEach((item) => {
                 if (!Array.isArray(body[key as string])) body[key as string] = []
                 ;(body[key as string] as any[]).push(item)
             })
-        } else if (value !== null && value !== undefined) {
+            continue
+        }
+
+        if (value !== null && value !== undefined) {
             body[key as string] = value
         }
-    })
+    }
 
     delete (body as any).confirmPassword
 

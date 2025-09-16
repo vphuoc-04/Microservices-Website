@@ -18,7 +18,7 @@ interface CustomSheetProps {
 const CustomSheet = ({title, description, children, className, isSheetOpen, closeSheet}: CustomSheetProps) => {
     return (
         <Sheet open={isSheetOpen} onOpenChange={closeSheet}>
-            <SheetContent className={`${className ?? ''} overflow-y-scroll`}>
+            <SheetContent className={`${className ?? ''} overflow-y-scroll`} onInteractOutside={(e) => e.preventDefault()}>
                 <SheetHeader>
                     <SheetTitle>{title}</SheetTitle>
                     <SheetDescription>

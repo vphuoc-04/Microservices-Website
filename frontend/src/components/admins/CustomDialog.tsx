@@ -1,5 +1,4 @@
 import { ReactNode } from "react"
-import CustomButton from "@/components/admins/CustomButton"
 
 import {
   Dialog,

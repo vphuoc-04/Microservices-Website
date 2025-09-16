@@ -1,5 +1,8 @@
 CREATE TABLE users (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    publish TINYINT DEFAULT 1,
+    birth_date TIMESTAMP DEFAULT NULL,
+    gender TINYINT DEFAULT NULL,
     first_name VARCHAR(25) NOT NULL,
     middle_name VARCHAR(25) NOT NULL,
     last_name VARCHAR(25) NOT NULL,

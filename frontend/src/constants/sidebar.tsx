@@ -1,4 +1,4 @@
-import { FaChartPie, FaUser, FaFingerprint  } from "react-icons/fa";
+import { FaChartPie, FaUser, FaFingerprint, FaFileAlt  } from "react-icons/fa";
 
 export const sidebarItem = [
     {
@@ -33,9 +33,15 @@ export const sidebarItem = [
                 label: 'Phân Quyền',
                 active: ['permission'],
                 to: '/admin/permission/permissions',
-                links: [
-                    //{ title: 'Quản lý phân quyền', to: '/admin/permission/permissions' }
+                links: [ //{ title: 'Quản lý phân quyền', to: '/admin/permission/permissions' }
                 ]
+            },
+            {
+                icons: <FaFileAlt  />,
+                label: 'Tập tin',
+                active: ['file'],
+                to: '/admin/file/files',
+                links: []
             }
         ]
     }

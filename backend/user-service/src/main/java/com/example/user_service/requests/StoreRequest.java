@@ -33,7 +33,7 @@ public class StoreRequest {
     @NotBlank(message = "Password cannot be empty")
     private String password;
 
-    private String img;
+    private Long imgId;
 
     @NotNull(message = "Birth date cannot be empty")
     private LocalDateTime birthDate;

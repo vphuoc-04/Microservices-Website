@@ -200,7 +200,7 @@ public class UserService extends BaseService implements UserServiceInterface, Us
             dto.setLastName(user.getLastName());
             dto.setEmail(user.getEmail());
             dto.setPhone(user.getPhone());
-            dto.setImg(user.getImg());
+            dto.setImgId(user.getImgId());
             dto.setUserCatalogueId(
                 user.getUserCatalogueUsers()
                     .stream()
@@ -278,7 +278,7 @@ public class UserService extends BaseService implements UserServiceInterface, Us
                 .email(request.getEmail())
                 .phone(request.getPhone())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .img(request.getImg())
+                .imgId(request.getImgId())
                 .birthDate(request.getBirthDate())
                 .gender(request.getGender())
                 .publish(request.getPublish())
@@ -323,7 +323,7 @@ public class UserService extends BaseService implements UserServiceInterface, Us
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
-        user.setImg(request.getImg());
+        user.setImgId(request.getImgId());
         user.setBirthDate(request.getBirthDate());
         user.setGender(request.getGender());
         user.setPublish(request.getPublish());

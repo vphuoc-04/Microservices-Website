@@ -12,7 +12,8 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserResource {
     private final Long id;
-    private final String img;
+    private final Long imgId;
+    private final String imgUrl;
     private final Integer publish;
     private final String email;
     private final String firstName;

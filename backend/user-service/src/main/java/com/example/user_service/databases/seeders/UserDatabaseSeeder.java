@@ -42,7 +42,7 @@ public class UserDatabaseSeeder implements CommandLineRunner {
             user.setEmail("vphuoc2409@gmail.com");
             user.setPhone("0123456789");
             user.setPassword(passwordEncode);
-            user.setImg(null);
+            user.setImgId(null);
 
             userRepository.save(user);
         }

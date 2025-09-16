@@ -1,6 +1,7 @@
 export type User = {
     id: number,
-    img: string,
+    imgId: number | null,
+    imgUrl: string | null,
     firstName: string,
     middleName: string,
     lastName: string,
@@ -21,7 +22,9 @@ export type PayloadInputs = {
     phone: string;
     password?: string;  // chỉ khi create
     confirmPassword?: string; // chỉ để validate FE, không gửi BE
-    img?: File | null; // upload file
+    img?: File | null; // upload file (local only)
+    imgId?: number | null; // send to BE
+    imgUrl?: string | null; // send to BE
     birthDate: string | null;
     gender: number | undefined;
     userCatalogueId: number[];

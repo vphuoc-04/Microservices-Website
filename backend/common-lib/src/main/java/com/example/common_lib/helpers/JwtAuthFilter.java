@@ -37,14 +37,24 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+        String method = request.getMethod();
+        
         boolean skip = path.startsWith("/api/v1/auth/login") ||
             path.startsWith("/api/v1/auth/refresh_token") ||
             path.startsWith("/api/v1/auth/register") ||
             path.startsWith("/api/v1/users/validate") ||
             path.startsWith("/api/v1/users/email/") ||
-            (path.matches("/api/v1/users/\\d+$") && request.getMethod().equals("GET")) ||
+            (path.matches("/api/v1/users/\\d+$") && method.equals("GET")) ||
             path.startsWith("/api/v1/user_catalogue_permission/") ||
-            path.startsWith("/api/v1/user_catalogue_user/");
+            path.startsWith("/api/v1/user_catalogue_user/") ||
+            
+            // Thêm các endpoint public của upload service
+            path.startsWith("/api/v1/upload/files/public") ||
+            (path.matches("/api/v1/upload/files/\\d+/download") && method.equals("GET")) ||
+            (path.matches("/api/v1/upload/files/filename/.*/download") && method.equals("GET")) ||
+            (path.matches("/api/v1/upload/files/\\d+/thumbnail") && method.equals("GET")) ||
+            (path.matches("/api/v1/upload/files/filename/.*/thumbnail") && method.equals("GET"));
+            
         System.out.println("[JwtAuthFilter] shouldNotFilter path: " + path + " => " + skip);
         return skip;
     }
@@ -57,6 +67,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         try {
+            // Kiểm tra nếu là public endpoint thì skip authentication
+            if (isPublicEndpoint(request)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             final String authHeader = request.getHeader("Authorization");
             final String jwt;
             final String userId;
@@ -169,6 +185,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             );
             return;
         }
+    }
+
+    private boolean isPublicEndpoint(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        
+        // Kiểm tra các endpoint public (cùng logic với shouldNotFilter)
+        return path.startsWith("/api/v1/auth/login") ||
+            path.startsWith("/api/v1/auth/refresh_token") ||
+            path.startsWith("/api/v1/auth/register") ||
+            path.startsWith("/api/v1/users/validate") ||
+            path.startsWith("/api/v1/users/email/") ||
+            (path.matches("/api/v1/users/\\d+$") && method.equals("GET")) ||
+            path.startsWith("/api/v1/user_catalogue_permission/") ||
+            path.startsWith("/api/v1/user_catalogue_user/") ||
+            
+            // Thêm các endpoint public của upload service
+            path.startsWith("/api/v1/upload/files/public") ||
+            (path.matches("/api/v1/upload/files/\\d+/download") && method.equals("GET")) ||
+            (path.matches("/api/v1/upload/files/filename/.*/download") && method.equals("GET")) ||
+            (path.matches("/api/v1/upload/files/\\d+/thumbnail") && method.equals("GET")) ||
+            (path.matches("/api/v1/upload/files/filename/.*/thumbnail") && method.equals("GET"));
     }
 
     private void sendErrorResponse(

@@ -5,12 +5,14 @@ export const AUTH_SERVICE_PORT = 8081;
 export const USER_SERVICE_PORT = 8082;
 export const USER_CATALOGUE_SERVICE_PORT = 8083;
 export const PERMISSION_SERVICE_PORT = 8084;
+export const UPLOAD_SERVICE_PORT = 8085;
 
 export const serviceConfig = {
     authServiceBaseURL: `http://localhost:${AUTH_SERVICE_PORT}/api/v1`,
     userServiceBaseURL: `http://localhost:${USER_SERVICE_PORT}/api/v1`,
     userCatalogueServiceBaseURL: `http://localhost:${USER_CATALOGUE_SERVICE_PORT}/api/v1`,
     permissionServiceBaseURL: `http://localhost:${PERMISSION_SERVICE_PORT}/api/v1`,
+    uploadServiceBaseURL: `http://localhost:${UPLOAD_SERVICE_PORT}/api/v1`,
 };
 
 export const authServiceInstance = axios.create({
@@ -30,6 +32,11 @@ export const userCatalogueServiceInstance = axios.create({
 
 export const permissionServiceInstance = axios.create({
     baseURL: serviceConfig.permissionServiceBaseURL,
+    withCredentials: true,
+});
+
+export const uploadServiceInstance = axios.create({
+    baseURL: serviceConfig.uploadServiceBaseURL,
     withCredentials: true,
 });
 
@@ -111,6 +118,7 @@ const setupResponseInterceptor = (instance: AxiosInstance) => {
     userServiceInstance,
     userCatalogueServiceInstance,
     permissionServiceInstance,
+    uploadServiceInstance
 ].forEach((instance) => {
     attachTokenInterceptor(instance);
     setupResponseInterceptor(instance);

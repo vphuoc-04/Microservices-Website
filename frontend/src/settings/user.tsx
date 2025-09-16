@@ -7,6 +7,7 @@ import { User } from "@/types/User";
 
 // Constants
 import { genders } from '@/constants/generals';
+import { serviceConfig } from '@/configs/axios';
 
 // Hooks
 import { Sheet } from '@/hooks/useSheet';
@@ -52,15 +53,19 @@ interface tableColumn {
 
 const tableColumn: tableColumn[] = [
     {
-        name: 'ID',
+        name: '',
         render: (item: User) => (
-            <div className="flex items-center">
-                <Avatar>
-                    {item.img ? <AvatarImage src={item.img} alt='avatar'/> : <AvatarFallback></AvatarFallback>}
-                </Avatar>
-                <span>{item.id}</span>
+            <div className="flex items-center justify-center w-[40px] h-[40px] rounded-full">
+                <Avatar >
+                    {item.imgUrl ? <AvatarImage className='w-[40px] h-[40px] rounded-full' src={item.imgUrl} alt="avatar" /> : <AvatarFallback />}
+            </Avatar>
             </div>
         )
+    },
+    {
+        name: 'ID',
+        render: (item: User) => 
+                <span>{item.id}</span>
     },
     {
         name: 'Họ',

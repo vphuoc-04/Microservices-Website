@@ -31,11 +31,13 @@ import DashboardPanel from './pages/admins/Dashboard.tsx'
 import { User } from './pages/admins/users/user/User.tsx'
 import { Catalogue } from './pages/admins/users/catalogue/Catalogue.tsx'
 import { Permission }  from './pages/admins/permissions/Permisson.tsx'
+import { File } from './pages/admins/files/File.tsx'
 
 // Customer pages
 import LoginCustomer from './pages/clients/Login.tsx'
 import RegisterCustomer from './pages/clients/Register.tsx'
 import Home from './pages/clients/Home.tsx'
+
 
 const router = createBrowserRouter([
     {
@@ -61,7 +63,10 @@ const router = createBrowserRouter([
             { path: 'user/catalogue', element: <Catalogue /> },
 
             // Permission
-            { path: 'permission/permissions', element: <Permission /> }
+            { path: 'permission/permissions', element: <Permission /> },
+
+            // File
+            { path: 'file/files', element: <File /> }
         ]
     },
 

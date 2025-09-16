@@ -43,6 +43,7 @@
         <module>auth-service</module>
         <module>api-gateway</module>
         <module>permission-service</module>
+        <module>upload-service</module>
     </modules>
     
     <dependencyManagement>

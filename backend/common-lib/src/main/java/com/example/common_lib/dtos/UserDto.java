@@ -23,7 +23,8 @@ public class UserDto {
     private String lastName;
     private String email;
     private String phone;
-    private String img;
+    private Long imgId;
+    private String imgUrl;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate birthDate;

@@ -29,14 +29,15 @@ const Aside = () => {
                     <div key={index}>
                         <span className="text-[13px]">{group.label}</span>
                         <div className="menu-category my-3">
-                            <Accordion type="single" collapsible className="sidebar-accordion" defaultValue="">
+                            <Accordion type="single" collapsible className="sidebar-accordion flex flex-col gap-y-1" defaultValue="">
                                 {group.items.map((item, itemIndex) => (
                                     item.links.length === 0 ? (
-                                        <Link 
-                                            key={itemIndex} 
-                                            to={'to' in item ? item.to : '#'}
-                                            className={`flex items-center gap-2 px-3 py-5 w-full rounded-md cursor-pointer
-                                                ${item.active.includes(segment) ? 'text-white bg-[rgba(255,255,255,0.1)]' : 'text-[#c9c5c5]'}
+                                        <Link
+                                            key={itemIndex}
+                                            to={item.to ?? '#'}
+                                            className={`flex items-center gap-2 px-3 py-5 w-full rounded-md cursor-pointer 
+                                                ${item.active.includes(segment) ? 'text-white bg-[rgba(255,255,255,0.1)]' 
+                                                                                : 'text-[#c9c5c5] hover:bg-[rgba(255,255,255,0.1)]'}
                                             `}
                                         >
                                             {item.icons}
@@ -51,13 +52,13 @@ const Aside = () => {
                                                     ${item.active.includes(segment) ? 'text-white bg-[rgba(255,255,255,0.1)]' : 'text-[#c9c5c5]'}
                                                 `}
                                             >
-                                                <div className=" menu-label flex items-center gap-2 rounded-md w-50 py-3">
+                                                <div className=" menu-label flex items-center gap-2 rounded-md w-50 py-3 no-underline">
                                                     {item.icons}
                                                     <span className="no-underline">{item.label}</span>
                                                 </div>
                                             </AccordionTrigger>
 
-                                            <AccordionContent className="mt-3">
+                                            <AccordionContent className="mt-2">
                                                 <ul className="flex flex-col gap-2 ml-7 text-[15px]">
                                                     {item.links.map((link, linkIndex) => {
                                                         const isActiveLink = location.pathname === link.to;
