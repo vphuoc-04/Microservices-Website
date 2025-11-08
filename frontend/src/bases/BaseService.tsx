@@ -1,5 +1,6 @@
 import { AxiosInstance } from "axios";
-import { uploadService } from "./UploadService";
+
+import { uploadService } from "@/services/UploadService";
 
 interface Pagination<T = any> {
   items: T[]

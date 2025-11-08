@@ -30,6 +30,7 @@ const Paginate: React.FC<PaginationProps> = ({ links, onPageChange }) => {
 
     const filterLinks = links.filter((link, index) => {
         if (index === 0 || index === links.length - 1) return true;
+        console.log(link);
 
         return index >= activeLinkIndex - 3 && index <= activeLinkIndex + 3;
     });

@@ -17,10 +17,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.common_lib.dtos.UserDto;
+import com.example.common_lib.helpers.FilterParameter;
 import com.example.common_lib.services.BaseService;
+import com.example.common_lib.specifications.BaseSpecification;
 import com.example.user_service.entities.User;
 import com.example.user_service.entities.UserCatalogueUser;
-import com.example.user_service.helpers.FilterParameter;
 import com.example.user_service.repositories.UserCatalogueUserRepository;
 import com.example.user_service.repositories.UserRepository;
 import com.example.user_service.requests.ChangePasswordRequest;
@@ -28,7 +29,6 @@ import com.example.user_service.requests.StoreRequest;
 import com.example.user_service.requests.UpdatePublishRequest;
 import com.example.user_service.requests.UpdateRequest;
 import com.example.user_service.services.interfaces.UserServiceInterface;
-import com.example.user_service.specifications.BaseSpecification;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;

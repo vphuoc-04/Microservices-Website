@@ -35,9 +35,9 @@ const Aside = () => {
                                         <Link
                                             key={itemIndex}
                                             to={item.to ?? '#'}
-                                            className={`flex items-center gap-2 px-3 py-5 w-full rounded-md cursor-pointer 
+                                            className={`flex items-center gap-2 px-3 py-3 w-full rounded-md cursor-pointer 
                                                 ${item.active.includes(segment) ? 'text-white bg-[rgba(255,255,255,0.1)]' 
-                                                                                : 'text-[#c9c5c5] hover:bg-[rgba(255,255,255,0.1)]'}
+                                                                                : 'text-white hover:bg-[rgba(255,255,255,0.1)]'}
                                             `}
                                         >
                                             {item.icons}
@@ -47,9 +47,9 @@ const Aside = () => {
                                         <AccordionItem key={itemIndex} value={`item-${index}-${itemIndex}`} className="border-b-0">
                                             <AccordionTrigger
                                                 className={`
-                                                    flex items-center gap-2 px-3 py-2 w-full cursor-pointer
+                                                    flex items-center gap-2 px-3 py-0 w-full cursor-pointer
                                                     [&>svg]:stroke-white
-                                                    ${item.active.includes(segment) ? 'text-white bg-[rgba(255,255,255,0.1)]' : 'text-[#c9c5c5]'}
+                                                    ${item.active.includes(segment) ? 'text-white bg-[rgba(255,255,255,0.1)]' : 'text-white'}
                                                 `}
                                             >
                                                 <div className=" menu-label flex items-center gap-2 rounded-md w-50 py-3 no-underline">
@@ -66,12 +66,12 @@ const Aside = () => {
                                                                 <li key={linkIndex}>
                                                                 <Link to={link.to}>
                                                                     <p
-                                                                    className={`
-                                                                        py-3 pl-3 w-full rounded-[5px]
-                                                                        ${isActiveLink
-                                                                        ? 'text-white bg-[rgba(255,255,255,0.1)]'
-                                                                        : 'text-[#c9c5c5] hover:bg-[rgba(255,255,255,0.1)]'}
-                                                                    `}
+                                                                        className={`
+                                                                            py-3 pl-3 w-full rounded-[5px]
+                                                                            ${isActiveLink
+                                                                            ? 'text-white bg-[rgba(255,255,255,0.1)]'
+                                                                            : 'text-[#c9c5c5] hover:bg-[rgba(255,255,255,0.1)]'}
+                                                                        `}
                                                                     >
                                                                     {link.title}
                                                                     </p>

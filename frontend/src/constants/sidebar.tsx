@@ -6,7 +6,7 @@ export const sidebarItem = [
         items: [
             {
                 icons: <FaChartPie />,
-                label: 'Tổng Quan',
+                label: 'Dashboard',
                 active: ['dashboard'],
                 to: '/admin/dashboard',
                 links: [

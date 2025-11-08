@@ -59,7 +59,7 @@ const createUserCatalogue = async(name: string, publish: string, users: number[]
     }
 }
 
-const updateUserCatalogue = async(id: number, name: string, publish: string): Promise<boolean> => {
+const updateUserCatalogue = async(id: string, name: string, publish: string): Promise<boolean> => {
     try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -107,10 +107,49 @@ const deleteUserCatalogue = async (id: string): Promise<boolean> => {
     }
 };
 
+const getUserCatalogueById = async (id: string): Promise<UserCatalogue | null> => {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) return null;
+        
+        const response = await userCatalogueServiceInstance.get(
+            `/user_catalogue/${id}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        return response.data.data || null;
+    } catch (error) {
+        handleAxiosError(error);
+        return null;
+    }
+};
+
+// const getUserCatalogueByIdFromList = async (id: string): Promise<UserCatalogue | null> => {
+//     try {
+//         const catalogues = await fetchUserCatalogue();
+//         return catalogues.find(catalogue => catalogue.id === id) || null;
+//     } catch (error) {
+//         handleAxiosError(error);
+//         return null;
+//     }
+// };
+
+
+export const getUserCataloguePermissions = async (catalogueId: string): Promise<number[]> => {
+  const response = await userCatalogueServiceInstance.get(`/user_catalogue_permission/by-catalogue/${catalogueId}`)
+  return response.data
+}
+
+// Lấy users của user catalogue  
+export const getUserCatalogueUsers = async (catalogueId: string): Promise<number[]> => {
+  const response = await userCatalogueServiceInstance.get(`/user_catalogue_user/by-catalogue/${catalogueId}`)
+  return response.data
+}
+
 export { 
     model,
     fetchUserCatalogue,
     createUserCatalogue,
     updateUserCatalogue,
     deleteUserCatalogue,
+    getUserCatalogueById,
 }

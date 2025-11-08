@@ -7,13 +7,12 @@ import { User } from "@/types/User";
 
 // Constants
 import { genders } from '@/constants/generals';
-import { serviceConfig } from '@/configs/axios';
 
 // Hooks
 import { Sheet } from '@/hooks/useSheet';
 
 // Components
-import Recovery from '@/pages/admins/users/catalogue/includes/Recovery';
+import Recovery from '@/pages/admins/users/user/includes/Recovery';
 
 const breadcrumb = {
     items: [
@@ -55,18 +54,19 @@ const tableColumn: tableColumn[] = [
     {
         name: '',
         render: (item: User) => (
-            <div className="flex items-center justify-center w-[40px] h-[40px] rounded-full">
+            //<div className="w-[10px] h-[10px]">
+            <div className="flex items-center justify-center w-[40px] h-[40px] rounded-full border-[1px]">
                 <Avatar >
-                    {item.imgUrl ? <AvatarImage className='w-[40px] h-[40px] rounded-full' src={item.imgUrl} alt="avatar" /> : <AvatarFallback />}
+                    {item.imgUrl ? <AvatarImage className='flex items-center justify-center w-[40px] h-[40px] rounded-full border-[1px]' src={item.imgUrl} alt="avatar" /> : <AvatarFallback />}
             </Avatar>
             </div>
         )
     },
-    {
-        name: 'ID',
-        render: (item: User) => 
-                <span>{item.id}</span>
-    },
+    // {
+    //     name: 'ID',
+    //     render: (item: User) => 
+    //             <span>{item.id}</span>
+    // },
     {
         name: 'Họ',
         render: (item: User) => <span>{item.lastName}</span>
@@ -137,6 +137,7 @@ const buttonActions: ButtonAction<ActionParam[]>[] = [
         method: 'update',
         params: ['id', 'name', 'openSheet:f'],
         onClick: (id: string, name: string, openSheet: OpenSheetFunction) => {
+            console.log(id, name);
             openSheet({ open: true, action: 'update', id: id })
         }
     },

@@ -1,4 +1,4 @@
-package com.example.user_service.specifications;
+package com.example.common_lib.specifications;
 
 import java.util.ArrayList;
 import java.util.List;

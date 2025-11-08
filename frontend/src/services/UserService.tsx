@@ -13,7 +13,7 @@ import { UpdateStatusByFieldParam } from '@/interfaces/BaseServiceInterface';
 // Services
 import { fetchUserCatalogue } from './UserCatalogueService';
 
-import { basePagination, baseRemove, baseSave } from './BaseService';
+import { basePagination, baseRemove, baseSave } from '@/bases/BaseService';
 
 const model = 'users';
 

@@ -1,5 +1,5 @@
 // hooks/useCatalogue.ts
-import { Option } from "@/components/admins/CustomSelectBox";
+import { Option } from "@/components/customs/CustomSelectBox";
 import { fetchUserCatalogue } from "@/services/UserCatalogueService";
 import { useEffect, useState } from "react";
 

@@ -48,7 +48,7 @@ const Header = () => {
                     <DropdownMenuTrigger asChild>
                         <Avatar className="w-[40px] h-[40px] cursor-pointer">
                         <AvatarImage
-                            src={authUser?.img ? authUser?.img : "https://github.com/shadcn.png"}
+                            src={authUser?.imgUrl ? authUser?.imgUrl : "https://github.com/shadcn.png"}
                         />
                         <AvatarFallback>CN</AvatarFallback>
                         </Avatar>

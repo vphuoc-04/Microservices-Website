@@ -3,4 +3,8 @@ export interface Permission {
     name: string;
     description?: string;
     publish: number;
+    addedBy?: number;
+    editedBy?: number;
+    createdAt?: string;
+    updatedAt?: string;
 }

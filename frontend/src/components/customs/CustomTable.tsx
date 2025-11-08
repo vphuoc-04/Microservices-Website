@@ -12,8 +12,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import CustomAlertDialog from "@/components/admins/CustomAlertDialog";
-import CustomDialog from "@/components/admins/CustomDialog";
+import CustomAlertDialog from "@/components/customs/CustomAlertDialog";
+import CustomDialog from "@/components/customs/CustomDialog";
 
 // Hooks
 import useColumnState from "@/hooks/useColumnState";
@@ -64,7 +64,7 @@ const CustomTable = ({
 
     return (
         <>
-            <Table className="border-[1px]">
+            <Table className="table-auto w-full border">
                 <TableHeader>
                     <TableRow>
                         <TableHead>
@@ -84,7 +84,7 @@ const CustomTable = ({
                 <TableBody>
                     {isLoading ? (
                         <TableRow>
-                            <TableCell colSpan={12}  className="text-center">
+                            <TableCell colSpan={13}  className="text-center">
                                 <div className="flex items-center justify-center gap-2 py-4">
                                     <div className="spinner"></div>
                                     <span className="text-gray-600">Loading...</span>
@@ -93,13 +93,13 @@ const CustomTable = ({
                         </TableRow>
                     ) : isError ? (
                         <TableRow>
-                            <TableCell colSpan={12}  className="text-center">
+                            <TableCell colSpan={13}  className="text-center">
                                 Có vấn đề xảy ra trong quá trình truy xuất dữ liệu. Hãy thử lại sau.
                             </TableCell>
                         </TableRow>
                     ) : !data[model] || data[model].length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={12}  className="text-center">
+                            <TableCell colSpan={13}  className="text-center">
                                 Không có dữ liệu tồn tại
                             </TableCell>
                         </TableRow>

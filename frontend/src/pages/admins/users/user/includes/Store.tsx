@@ -8,10 +8,10 @@ import { AvatarFallback } from "@radix-ui/react-avatar"
 import { USER_KEYS_TO_CHECK } from "@/constants/formkey"
 
 // Components
-import CustomSelectBox, { Option } from "@/components/admins/CustomSelectBox"
-import CustomInput from "@/components/admins/CustomInput"
+import CustomSelectBox, { Option } from "@/components/customs/CustomSelectBox"
+import CustomInput from "@/components/customs/CustomInput"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
-import CustomButton from "@/components/admins/CustomButton"
+import CustomButton from "@/components/customs/CustomButton"
 
 // Services
 import { save, getUserById } from "@/services/UserService"
@@ -27,7 +27,6 @@ import useAllDifferent from "@/hooks/useAllDifferent"
 import { PayloadInputs, User } from "@/types/User"
 import { validation, mapUserToFormDefaults } from "@/validations/user/StoreUserValidation"
 import { uploadService } from "@/services/UploadService"
-import { serviceConfig } from "@/configs/axios"
 
 // Interfaces
 import { SelectBoxItem } from "@/interfaces/BaseServiceInterface"
@@ -85,7 +84,7 @@ const UserStore = ({ userId, action, refetch, closeSheet }: UserStoreProps) => {
             control: control,
             disabled: action === 'view',
             options: genders,
-            onSelectedChange: (value?: string) => {
+            onSelectedChange: (value?: string | string[]) => {
                 if (value !== undefined) {
                     setValue('gender', value ? Number(value) as any : undefined, { shouldDirty: true, shouldValidate: true })
                 }
@@ -103,7 +102,7 @@ const UserStore = ({ userId, action, refetch, closeSheet }: UserStoreProps) => {
             control: control,
             disabled: action === 'view',
             options: catalogues,
-            onSelectedChange: (value?: string) => {
+            onSelectedChange: (value?: string | string[]) => {
                 if (value !== undefined) {
                     setValue('userCatalogueId', value ? [Number(value)] as any : [], { shouldDirty: true, shouldValidate: true })
                 }

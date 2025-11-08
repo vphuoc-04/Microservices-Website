@@ -1,12 +1,11 @@
 package com.example.permission_service.controllers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,6 +27,7 @@ import com.example.permission_service.repositories.PermissionRepository;
 import com.example.permission_service.requests.StoreRequest;
 import com.example.permission_service.requests.UpdateRequest;
 import com.example.permission_service.resources.PermissionResource;
+import com.example.permission_service.services.interfaces.PermissionServiceInterface;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,10 +36,19 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/permissions")
 public class PermissionController {
+    private final PermissionServiceInterface permissionService;
+
     @Autowired
     private PermissionRepository permissionRepository;
+
     @Autowired
     private JwtService jwtService;
+
+    public PermissionController(
+        PermissionServiceInterface permissionService
+    ){
+        this.permissionService = permissionService;
+    }
 
     @GetMapping("/get_all")
     @RequirePermission(action = "permission:get_all")
@@ -50,12 +59,24 @@ public class PermissionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/get_page")
-    public ResponseEntity<?> getPage(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Permission> permissionPage = permissionRepository.findAll(pageable);
-        Page<PermissionResource> resourcePage = permissionPage.map(this::toResource);
-        ApiResource<Page<PermissionResource>> response = ApiResource.ok(resourcePage, "Permission page fetched successfully");
+    @GetMapping("/pagination")
+    public ResponseEntity<?> pagination(HttpServletRequest request) {
+        Map<String, String[]> parameters = request.getParameterMap();
+
+        Page<Permission> permissions = permissionService.paginate(parameters, request);
+
+        Page<PermissionResource> permissionResources = permissions.map(permisson -> 
+            PermissionResource.builder()
+                .id(permisson.getId())
+                .name(permisson.getName())
+                .description(permisson.getDescription())
+                .addedBy(permisson.getAddedBy())
+                .editedBy(permisson.getEditedBy())
+                .build()
+        );
+
+        ApiResource<Page<PermissionResource>> response = ApiResource.ok(permissionResources, "Danh sách các quyền");
+
         return ResponseEntity.ok(response);
     }
 

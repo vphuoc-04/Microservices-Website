@@ -3,6 +3,7 @@ import { authServiceInstance } from '../configs/axios';
 
 // Helpers
 import { handleAxiosError } from "../helpers/axiosHelper";
+import { me } from './UserService';
 
 type RegisterPayload = {
     firstName: string,
@@ -43,8 +44,10 @@ const login = async (payload:LoginPayload): Promise<boolean> => {
             password: payload.password
         })
 
+        const user = await me();
+
         if (response?.data) {
-            localStorage.setItem('user', JSON.stringify(response.data.data.user));
+            localStorage.setItem('user', JSON.stringify(user));
             localStorage.setItem('token', response.data.data.token);
             localStorage.setItem('refresh_token', response.data.data.refreshToken);
         }

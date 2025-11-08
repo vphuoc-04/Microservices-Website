@@ -23,15 +23,15 @@ const breadcrumb = {
         description: "Hiển thị danh sách nhóm thành viên, sử dụng các chức năng bên dưới để lọc theo mong muốn"
     },
     create: {
-        title: "THÊM MỚI NGƯỜI DÙNG",
+        title: "THÊM MỚI NHÓM NGƯỜI DÙNG",
         description: "Nhập đầy đủ các thông tin phía dưới. Các mục có dấu * là bắt buộc."
     },
     update: {
-        title: "CHỈNH SỬA THÔNG TIN NGƯỜI DÙNG",
+        title: "CHỈNH SỬA NHÓM NGƯỜI DÙNG",
         description: "Chỉnh sửa các thông tin phía dưới. Các mục có dấu * là bắt buộc."
     },
     view: {
-        title: "XEM THÔNG TIN NGƯỜI DÙNG",
+        title: "XEM THÔNG NHÓM TIN NGƯỜI DÙNG",
         description: "Thông tin người dùng chỉ có thể xem, không thể chỉnh sửa"
     }
 };

@@ -12,6 +12,8 @@ import { clearToast } from "../../redux/slice/toastSlice";
 // components
 import { Aside } from "./aside";
 import { Header } from "./header";
+import CustomAlertDialog from "../customs/CustomAlertDialog";
+import useDialog from "@/hooks/useDialog";
 
 const Layout: React.FC = () => {
     const dispatch = useDispatch();
@@ -26,12 +28,13 @@ const Layout: React.FC = () => {
         }
     }, [message, type, dispatch]);
 
+
     return (
-        <div className="flex">
+        <div className="flex h-screen overflow-hidden">
             <Aside />
             <div className="flex-1 bg-gray-100 flex flex-col">
                 <Header />
-                <div>
+                <div className="flex-1 overflow-y-auto">
                     <Outlet />
                 </div>
             </div>

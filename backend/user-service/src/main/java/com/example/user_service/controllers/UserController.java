@@ -199,7 +199,7 @@ public class UserController {
 
     @GetMapping("/pagination")
     @RequirePermission(action = "users:get_all_user")
-    public ResponseEntity<?> getAllUsers(HttpServletRequest request) {
+    public ResponseEntity<?> pagination(HttpServletRequest request) {
         Map<String, String[]> parameters = request.getParameterMap();
 
         Page<User> users = userService.paginate(parameters, request);

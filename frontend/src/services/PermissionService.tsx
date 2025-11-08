@@ -1,7 +1,11 @@
 // Configs
 import { permissionServiceInstance } from '../configs/axios';
+
 // Helpers
 import { handleAxiosError } from "../helpers/axiosHelper";
+
+// Bases
+import { basePagination } from '@/bases/BaseService';
 
 const model = 'permissions';
 
@@ -12,26 +16,11 @@ export interface PermissionService {
     publish: number;
 }
 
-const getAllPermissions = async (): Promise<PermissionService[]> => {
-    try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            console.error("Token not found");
-            return [];
-        }
-        const response = await permissionServiceInstance.get(
-            "/permissions/get_all",
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
-        return response.data.data || [];
-    } catch (error) {
-        handleAxiosError(error);
-        return [];
-    }
+const pagination = async (queryString: string) => {
+    return basePagination(permissionServiceInstance, model, queryString).then(result => ({
+        permissions: result.items,
+        pagination: result.pagination
+    }));
 };
 
 export const createPermission = async (name: string, publish: number, description?: string): Promise<boolean> => {
@@ -50,7 +39,7 @@ export const createPermission = async (name: string, publish: number, descriptio
     }
 };
 
-export const updatePermission = async (id: number, name: string, publish: number, description?: string): Promise<boolean> => {
+export const updatePermission = async (id: string, name: string, publish: number, description?: string): Promise<boolean> => {
     try {
         const token = localStorage.getItem("token");
         if (!token) return false;
@@ -81,7 +70,7 @@ export const deletePermission = async (id: number): Promise<boolean> => {
     }
 };
 
-export const getPermissionById = async (id: number): Promise<PermissionService | null> => {
+export const getPermissionById = async (id: string): Promise<PermissionService | null> => {
     try {
         const token = localStorage.getItem("token");
         if (!token) return null;
@@ -96,8 +85,23 @@ export const getPermissionById = async (id: number): Promise<PermissionService |
     }
 };
 
+export const getAllPermissions = async (): Promise<PermissionService[]> => {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) return [];
+        const response = await permissionServiceInstance.get(
+            '/permissions/get_all',
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        return response.data.data || [];
+    } catch (error) {
+        handleAxiosError(error);
+        return [];
+    }
+};
+
 
 export {
     model,
-    getAllPermissions
+    pagination
 };

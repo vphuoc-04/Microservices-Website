@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 // Components
-import CustomButton from "@/components/admins/CustomButton"
-import CustomInput from "@/components/admins/CustomInput";
+import CustomButton from "@/components/customs/CustomButton"
+import CustomInput from "@/components/customs/CustomInput";
 
 // Helpers
 import { showToast } from "@/helpers/myHelper";

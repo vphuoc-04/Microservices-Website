@@ -1,13 +1,13 @@
 // Components
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card";
 import PageHeading from "@/components/admins/heading";
-import Paginate from "@/components/admins/paginate";
-import CustomTable from "@/components/admins/CustomTable";
-import Filter from "@/components/admins/Filter";
-import CustomSheet from "@/components/admins/CustomSheet";
+import Paginate from "@/components/customs/CustomPaginate";
+import CustomTable from "@/components/customs/CustomTable";
+import CustomFilter from "@/components/customs/CustomFilter";
+import CustomSheet from "@/components/customs/CustomSheet";
 
 // Services
-import { pagination, remove } from "@/services/UserService";
+import { pagination } from "@/services/PermissionService";
 
 import { model } from "@/services/PermissionService";
 
@@ -21,6 +21,8 @@ import { breadcrumb, tableColumn } from "@/settings/permission";
 import useCheckBoxState from "@/hooks/useCheckBoxState";
 import useTable from "@/hooks/useTable";
 import useSheet from "@/hooks/useSheet";
+import { useFilterConfig } from "@/hooks/useFilterConfig";
+import PermissionStore from "./includes/Store";
 
 const Permission = () => {
     const breadcrumbData: BreadcrumbData = breadcrumb
@@ -30,6 +32,8 @@ const Permission = () => {
     const anyChecked = isAnyChecked();
 
     const { isSheetOpen, openSheet, closeSheet } = useSheet();
+
+    const { config } = useFilterConfig(model)
 
     return (
         <>
@@ -41,13 +45,14 @@ const Permission = () => {
                         <CardDescription className="text-[#f00000]">{breadcrumb.page.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Filter 
-                            isAnyChecked={anyChecked} 
-                            checkedState={checkedState} 
-                            model={model} 
-                            refetch={refetch} 
-                            handleQueryString={(filters: any) => handleQueryString(filters)}
+                        <CustomFilter 
+                            isAnyChecked={anyChecked}
+                            checkedState={checkedState}
+                            model={model}
+                            refetch={refetch}
+                            handleQueryString={handleQueryString}
                             openSheet={openSheet}
+                            filterConfig={config}
                         />
                         <CustomTable 
                             isLoading={isLoading}
@@ -60,7 +65,6 @@ const Permission = () => {
                             handleCheckedChange={handleCheckedChange}
                             handleCheckedAllChange={handleCheckedAllChange}
                             openSheet={openSheet}
-                            remove={remove}
                             refetch={refetch}
                         />
                     </CardContent>
@@ -68,6 +72,32 @@ const Permission = () => {
                         <Paginate links={buildLinks(data?.pagination)} onPageChange={handlePageChange} />
                     </CardFooter>
                 </Card>
+                <CustomSheet 
+                    title={
+                        isSheetOpen.action === 'update'
+                        ? breadcrumb.update.title
+                        : isSheetOpen.action === 'view'
+                        ? breadcrumb.view.title
+                        : breadcrumb.create.title
+                    }
+                    description={
+                        isSheetOpen.action === 'update'
+                        ? breadcrumb.update.description
+                        : isSheetOpen.action === 'view'
+                        ? breadcrumb.view.description
+                        : breadcrumb.create.description
+                    }
+                    isSheetOpen={isSheetOpen.open} 
+                    closeSheet={closeSheet}
+                    className="w-[500px] sm:w-[550px]"
+                >
+                    <PermissionStore 
+                        refetch={refetch}
+                        closeSheet={closeSheet}
+                        permissionId={isSheetOpen.id}
+                        action={isSheetOpen.action}
+                    />
+                </CustomSheet>
             </div>
         </>
     );

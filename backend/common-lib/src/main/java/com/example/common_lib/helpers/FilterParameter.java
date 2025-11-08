@@ -1,4 +1,4 @@
-package com.example.user_service.helpers;
+package com.example.common_lib.helpers;
 
 import java.util.HashMap;
 import java.util.Map;

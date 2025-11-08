@@ -1,4 +1,4 @@
-import { Option } from "@/components/admins/CustomSelectBox"
+import { Option } from "@/components/customs/CustomSelectBox"
 import { Sheet } from "@/hooks/useSheet"
 import { JSX } from "react"
 
@@ -24,6 +24,34 @@ export interface FilterProps extends CheckedStateInterface, SheetProps {
     handleQueryString: any,
 }
 
+export interface FilterSetting {
+    field: string;
+    type: 'select' | 'input' | 'date' | 'number';
+    placeholder: string;
+    options?: Array<{ id: string | number; name: string }>;
+    dataSource?: 'static' | 'api';
+    apiEndpoint?: string;
+    dependsOn?: string;
+}
+
+export interface ActionSetting {
+    value: string;
+    label: string;
+    method: string;
+    requiresSelection: boolean;
+    confirmMessage?: string;
+}
+
+export interface ModelFilterConfig {
+    model: string;
+    filters: FilterSetting[];
+    actions: ActionSetting[];
+    createButton?: {
+        label: string;
+        icon: JSX.Element;
+    };
+}
+
 export interface CustomAlertDialogProps {
     isOpen: boolean,
     title: string,
@@ -43,8 +71,8 @@ export interface CustomTableProps extends SheetProps {
     checkedAllState: boolean,
     handleCheckedChange: (id: number) => void
     handleCheckedAllChange: () => void,
-    remove: (id: string) => Promise<any>,
-    changePassword: (id: string, payload: { newPassword: string, confirmPassword: string }) => Promise<any>,
+    remove?: (id: string) => Promise<any>,
+    changePassword?: (id: string, payload: { newPassword: string, confirmPassword: string }) => Promise<any>,
     refetch: any,
     [key: string]: any   
     restProps?: Record<string, any>
@@ -54,11 +82,12 @@ export interface SelectBoxItem {
     title: string | undefined,
     placeholder: string | undefined,
     options: Option[],
-    value: Option | null,
+    value: Option | Option[] | null, // Hỗ trợ cả single và multiple
     rules: object,
     name: string,
     control: any,
     errors: any,
-    onSelectedChange?: (value: string | undefined) => void,
+    multiple?: boolean, // Thêm prop multiple
+    onSelectedChange?: (value: string | string[] | undefined) => void, // Hỗ trợ string[]
     isLoading?: boolean
 }

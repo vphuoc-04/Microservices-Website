@@ -11,7 +11,7 @@ import { setToast } from "../../redux/slice/toastSlice";
 import { setAuthLogin } from "../../redux/slice/authSlice";
 
 import { Input } from "@/components/ui/input";
-import CustomButton from "@/components/admins/CustomButton";
+import CustomButton from "@/components/customs/CustomButton";
 
 type Inptus = {
     email: string,
