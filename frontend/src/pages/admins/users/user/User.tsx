@@ -2,7 +2,7 @@
 import { model, pagination, remove, changePassword } from "@/services/UserService";
 
 // Settings
-import { breadcrumb, tableColumn } from "@/settings/user";
+import { breadcrumb, tableColumn, buttonActions } from "@/settings/user";
 
 // Components
 import {
@@ -73,6 +73,7 @@ const User = ({}) => {
                             remove={remove}
                             changePassword={changePassword}
                             refetch={refetch}
+                            actions={buttonActions}
                         />
                     </CardContent>
                     <CardFooter>

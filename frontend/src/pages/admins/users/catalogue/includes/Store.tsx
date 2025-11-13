@@ -11,7 +11,7 @@ import CustomInput from "@/components/customs/CustomInput"
 import CustomButton from "@/components/customs/CustomButton"
 
 // Services
-import { createUserCatalogue, updateUserCatalogue, getUserCatalogueById, getUserCataloguePermissions, getUserCatalogueUsers } from "@/services/UserCatalogueService"
+import { save, getUserCatalogueById, getUserCataloguePermissions, getUserCatalogueUsers } from "@/services/UserCatalogueService"
 import { getAllPermissions } from "@/services/PermissionService"
 import { pagination } from "@/services/UserService"
 
@@ -86,16 +86,7 @@ const UserCatalogueStore = ({ userCatalogueId, action, refetch, closeSheet }: Us
     const [validationRules] = useState(() => validation())
     const initialValuesRef = useRef<Partial<PayloadInputs> | null>(null)
 
-    const saveUserCatalogue = async (data: PayloadInputs): Promise<boolean> => {
-        if (action === 'create') {
-            return await createUserCatalogue(data.name, String(data.publish), data.users, data.permissions)
-        } else if (action === 'update' && userCatalogueId) {
-            return await updateUserCatalogue(userCatalogueId, data.name, String(data.publish))
-        }
-        return false
-    }
-
-    const { onSubmitHandler, loading } = useFormSubmit(saveUserCatalogue, refetch, closeSheet, { 
+    const { onSubmitHandler, loading } = useFormSubmit(save, refetch, closeSheet, { 
         action: action, 
         id: userCatalogueId 
     })

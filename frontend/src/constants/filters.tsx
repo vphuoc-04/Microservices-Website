@@ -1,5 +1,5 @@
 import { ModelFilterConfig } from "@/interfaces/BaseServiceInterface"
-import { FaPlus, FaUserPlus } from "react-icons/fa"
+import { FaPlus } from "react-icons/fa"
 
 import { perpages, publishs, sorts, genders } from "@/constants/generals"
 
@@ -108,7 +108,7 @@ export const userCatalogueFilterConfig: ModelFilterConfig = {
     ],
     createButton: {
         label: 'Thêm nhóm mới',
-        icon: <FaUserPlus />
+        icon: <FaPlus />
     }
 }
 
@@ -146,7 +146,7 @@ export const permissionFilterConfig: ModelFilterConfig = {
     ],
     createButton: {
         label: 'Thêm quyền mới',
-        icon: <FaUserPlus />
+        icon: <FaPlus />
     }
 }
 

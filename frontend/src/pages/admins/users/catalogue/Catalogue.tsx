@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
     Card, 
     CardContent, 
@@ -8,24 +7,19 @@ import {
     CardFooter,
 } from "@/components/ui/card";
 
-import { UserCatalogue } from "@/types/UserCatalogue";
-
 import {
     model,
-    fetchUserCatalogue, 
-    createUserCatalogue, 
-    updateUserCatalogue, 
-    deleteUserCatalogue 
+    pagination,
+    remove
 } from "@/services/UserCatalogueService";
-import { pagination } from "@/services/UserService";
-import { PermissionService } from "@/services/PermissionService";
+
 import PageHeading from "@/components/admins/heading";
 
 // Types
 import { BreadcrumbData } from "@/types/Breadcrumb";
 
 // Settings
-import { breadcrumb, tableColumn } from "@/settings/userCatalogue";
+import { breadcrumb, tableColumn, buttonActions } from "@/settings/userCatalogue";
 
 // Components
 import Paginate from "@/components/customs/CustomPaginate";
@@ -81,8 +75,9 @@ const Catalogue = () => {
                             handleCheckedChange={handleCheckedChange}
                             handleCheckedAllChange={handleCheckedAllChange}
                             openSheet={openSheet}
-                            remove={deleteUserCatalogue}
+                            remove={remove}
                             refetch={refetch}
+                            actions={buttonActions}
                         />
                     </CardContent>
                     <CardFooter>

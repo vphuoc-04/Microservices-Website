@@ -61,6 +61,19 @@ export interface CustomAlertDialogProps {
     isDialogLoading?: boolean
 }
 
+export interface ButtonAction<T extends any[] = any[]> {
+    onClick?: (...args: T) => void;
+    params?: (string | `${string}:f` | `${string}:c`)[];
+    className?: string;
+    icon?: React.ReactNode;
+    path?: string;
+    method?: string;
+    component?: React.ComponentType<any>;
+    isVisible?: (row: any) => boolean;
+    isDisabled?: (row: any) => boolean;
+    confirmMessage?: string;
+}
+
 export interface CustomTableProps extends SheetProps {
     data: any,
     isLoading: boolean,
@@ -74,6 +87,7 @@ export interface CustomTableProps extends SheetProps {
     remove?: (id: string) => Promise<any>,
     changePassword?: (id: string, payload: { newPassword: string, confirmPassword: string }) => Promise<any>,
     refetch: any,
+    actions?: ButtonAction[], 
     [key: string]: any   
     restProps?: Record<string, any>
 }
@@ -82,12 +96,12 @@ export interface SelectBoxItem {
     title: string | undefined,
     placeholder: string | undefined,
     options: Option[],
-    value: Option | Option[] | null, // Hỗ trợ cả single và multiple
+    value: Option | Option[] | null, 
     rules: object,
     name: string,
     control: any,
     errors: any,
-    multiple?: boolean, // Thêm prop multiple
-    onSelectedChange?: (value: string | string[] | undefined) => void, // Hỗ trợ string[]
+    multiple?: boolean,
+    onSelectedChange?: (value: string | string[] | undefined) => void,
     isLoading?: boolean
 }

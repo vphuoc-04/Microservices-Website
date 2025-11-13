@@ -10,14 +10,14 @@ import CustomInput from "@/components/customs/CustomInput"
 import CustomButton from "@/components/customs/CustomButton"
 
 // Services
-import { createPermission, updatePermission, getPermissionById } from "@/services/PermissionService"
+import { createPermission, updatePermission, getPermissionById, save } from "@/services/PermissionService"
 
 // Hooks
 import useFormSubmit from "@/hooks/useFormSubmit"
 import useAllDifferent from "@/hooks/useAllDifferent"
 
 // Types
-import { Permission } from "@/types/Permission"
+import { PayloadInputs, Permission } from "@/types/Permission"
 import { validation, mapPermissionToFormDefaults } from "@/validations/permissions/StorePermissionValidation"
 
 interface PermissionStoreProps {
@@ -27,11 +27,6 @@ interface PermissionStoreProps {
     action: string
 }
 
-interface PayloadInputs {
-    name: string;
-    description?: string;
-    publish: number;
-}
 
 const PermissionStore = ({ permissionId, action, refetch, closeSheet }: PermissionStoreProps) => {
     const { register, handleSubmit, formState: { errors, isValid }, watch, control, setValue, reset, getValues } = useForm<PayloadInputs>({
@@ -51,16 +46,16 @@ const PermissionStore = ({ permissionId, action, refetch, closeSheet }: Permissi
     const [validationRules] = useState(() => validation())
     const initialValuesRef = useRef<Partial<PayloadInputs> | null>(null)
 
-    const savePermission = async (data: PayloadInputs): Promise<boolean> => {
-        if (action === 'create') {
-            return await createPermission(data.name, data.publish, data.description)
-        } else if (action === 'update' && permissionId) {
-            return await updatePermission(permissionId, data.name, data.publish, data.description)
-        }
-        return false
-    }
+    // const savePermission = async (data: PayloadInputs): Promise<boolean> => {
+    //     if (action === 'create') {
+    //         return await createPermission(data.name, data.publish, data.description)
+    //     } else if (action === 'update' && permissionId) {
+    //         return await updatePermission(permissionId, data.name, data.publish, data.description)
+    //     }
+    //     return false
+    // }
 
-    const { onSubmitHandler, loading } = useFormSubmit(savePermission, refetch, closeSheet, { 
+    const { onSubmitHandler, loading } = useFormSubmit(save, refetch, closeSheet, { 
         action: action, 
         id: permissionId 
     })

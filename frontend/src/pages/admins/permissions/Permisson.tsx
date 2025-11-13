@@ -7,7 +7,7 @@ import CustomFilter from "@/components/customs/CustomFilter";
 import CustomSheet from "@/components/customs/CustomSheet";
 
 // Services
-import { pagination } from "@/services/PermissionService";
+import { pagination, remove } from "@/services/PermissionService";
 
 import { model } from "@/services/PermissionService";
 
@@ -15,7 +15,7 @@ import { model } from "@/services/PermissionService";
 import { BreadcrumbData } from "@/types/Breadcrumb";
 
 // Settings
-import { breadcrumb, tableColumn } from "@/settings/permission";
+import { breadcrumb, tableColumn, buttonActions } from "@/settings/permission";
 
 // Hooks
 import useCheckBoxState from "@/hooks/useCheckBoxState";
@@ -65,7 +65,9 @@ const Permission = () => {
                             handleCheckedChange={handleCheckedChange}
                             handleCheckedAllChange={handleCheckedAllChange}
                             openSheet={openSheet}
+                            remove={remove}
                             refetch={refetch}
+                            actions={buttonActions}
                         />
                     </CardContent>
                     <CardFooter>

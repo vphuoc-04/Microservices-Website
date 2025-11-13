@@ -1,10 +1,15 @@
-export interface Permission {
+export type Permission = {
     id: number;
     name: string;
     description?: string;
     publish: number;
     addedBy?: number;
     editedBy?: number;
-    createdAt?: string;
-    updatedAt?: string;
+}
+
+export type PayloadInputs = {
+    id: number;
+    name: string;
+    description?: string;
+    publish: number;
 }

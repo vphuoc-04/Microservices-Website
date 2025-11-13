@@ -1,11 +1,12 @@
 // Configs
+import { PayloadInputs } from '@/types/Permission';
 import { permissionServiceInstance } from '../configs/axios';
 
 // Helpers
 import { handleAxiosError } from "../helpers/axiosHelper";
 
 // Bases
-import { basePagination } from '@/bases/BaseService';
+import { basePagination, baseRemove, baseSave } from '@/bases/BaseService';
 
 const model = 'permissions';
 
@@ -23,52 +24,13 @@ const pagination = async (queryString: string) => {
     }));
 };
 
-export const createPermission = async (name: string, publish: number, description?: string): Promise<boolean> => {
-    try {
-        const token = localStorage.getItem("token");
-        if (!token) return false;
-        const response = await permissionServiceInstance.post(
-            "/permissions/create",
-            { name, publish, description },
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
-        return response.data && response.data.success;
-    } catch (error) {
-        handleAxiosError(error);
-        return false;
-    }
+const save = async (payload: PayloadInputs, updateParams: { action: string, id: string | null }) => {    
+    return baseSave(permissionServiceInstance, model, payload, updateParams);
 };
 
-export const updatePermission = async (id: string, name: string, publish: number, description?: string): Promise<boolean> => {
-    try {
-        const token = localStorage.getItem("token");
-        if (!token) return false;
-        const response = await permissionServiceInstance.put(
-            `/permissions/update/${id}`,
-            { name, publish, description },
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
-        return response.data && response.data.success;
-    } catch (error) {
-        handleAxiosError(error);
-        return false;
-    }
-};
-
-export const deletePermission = async (id: number): Promise<boolean> => {
-    try {
-        const token = localStorage.getItem("token");
-        if (!token) return false;
-        const response = await permissionServiceInstance.delete(
-            `/permissions/delete/${id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
-        return response.data && response.data.success;
-    } catch (error) {
-        handleAxiosError(error);
-        return false;
-    }
-};
+const remove = async(id: string) => {
+    return baseRemove(permissionServiceInstance, model, id);
+}
 
 export const getPermissionById = async (id: string): Promise<PermissionService | null> => {
     try {
@@ -103,5 +65,7 @@ export const getAllPermissions = async (): Promise<PermissionService[]> => {
 
 export {
     model,
-    pagination
+    pagination,
+    save,
+    remove
 };

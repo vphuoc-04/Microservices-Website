@@ -1,4 +1,4 @@
-export interface UserCatalogue {
+export type UserCatalogue = {
     id: number;
     name: string;
     publish: number;
@@ -6,4 +6,10 @@ export interface UserCatalogue {
     editedBy?: number;
     createdAt?: string;
     updatedAt?: string;
+}
+
+export type PayloadInputs = {
+    id: number;
+    name: string;
+    publish: number;
 }
